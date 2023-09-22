@@ -1,0 +1,75 @@
+﻿@model Gestion.EF.ItemCopiaActividadUbicacion
+
+    <div class="row">
+        <div class="col-md-3">
+            <div class="form-group">
+                <label asp-for="pIdUbicacionOrigen" class="control-label">Ubicación origen</label>
+                @Html.DropDownListFor(model =>
+                    model.pIdUbicacionOrigen,
+                    new SelectList(Model.Proyecto_Ubicaciones, "Id", "Nombre")
+                    , new { @class = "form-control" }
+                )
+            </div>
+        </div>
+
+
+
+        <div class="col-md-3">
+            <div class="form-group">
+                <label asp-for="pIdUbicacionFInal" class="control-label">Ubicación Final</label>
+                @Html.DropDownListFor(model =>
+                    model.pIdUbicacionFInal,
+                    new SelectList(Model.Proyecto_Ubicaciones, "Id", "Nombre")
+                    , new { @class = "form-control" }
+                )
+            </div>
+        </div>
+
+    </div>
+
+
+
+
+
+<div style="margin-top:20px;" class="row">
+    <div class="col-md-2">
+        <div class="btn-graba" type="button" onclick="GrabarCopiaubicaciones()"><i class="fas fa-check"></i> Grabar</div>
+    </div>
+    <div class="col-md-2">
+        <div class="btn-cerrar" type="button" data-dismiss="modal"><i class="far fa-times-circle"></i> Cerrar</div>
+    </div>
+    <div class="col-md-2"></div>
+</div>
+
+<script>
+
+
+    function GrabarCopiaubicaciones() {
+
+
+            var model = {
+                pIdUbicacionOrigen: $('#pIdUbicacionOrigen').val(),
+                pIdUbicacionFInal: $('#pIdUbicacionFInal').val(),
+
+            };
+
+
+            $.post("/Planificacion/Planificacion_CopiarActividad_EntreUbicaciones", model).done(function (e) {
+
+                if (!e.isError) {
+                    toastr.success(e.data, { timeOut: 2000 });
+                    cargaProyecto_ActividadesGrilla();
+                    $('#CopiaUbicacionModal').modal('hide');
+
+                } else {
+                    toastr.error(e.data, { timeOut: 2000 });
+                }
+
+            });
+
+    }
+
+
+     
+
+</script>

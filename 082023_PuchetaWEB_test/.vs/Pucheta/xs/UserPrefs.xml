@@ -1,0 +1,51 @@
+﻿<Properties StartupConfiguration="{99A49519-8EC9-4DDE-B07A-3879E4BF315B}|Default">
+  <MonoDevelop.Ide.ItemProperties.Gestion.Web PreferredExecutionTarget="/Applications/Google Chrome.app" />
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+  <MultiItemStartupConfigurations />
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore>
+      <Breakpoint file="/Users/leandrolisa/Projects/082023_PuchetaWEB_test/Gestion.Negocio/UsuariosNegocio.cs" relfile="Gestion.Negocio/UsuariosNegocio.cs" line="112" column="1" />
+      <Breakpoint file="/Users/leandrolisa/Projects/082023_PuchetaWEB_test/Gestion.Negocio/UsuariosNegocio.cs" relfile="Gestion.Negocio/UsuariosNegocio.cs" line="107" column="1" />
+      <Breakpoint file="/Users/leandrolisa/Projects/082023_PuchetaWEB_test/Gestion.Negocio/UsuariosNegocio.cs" relfile="Gestion.Negocio/UsuariosNegocio.cs" line="124" column="1" />
+    </BreakpointStore>
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.Workbench ActiveDocument="Gestion.EF/Models/Test.cs">
+    <Files>
+      <File FileName="Gestion.Web/appsettings.json" Line="10" Column="57" />
+      <File FileName="Gestion.Negocio/UsuariosNegocio.cs" Line="102" Column="42" />
+      <File FileName="Gestion.EF/Models/Usuarios.cs" Line="11" Column="9" />
+      <File FileName="Gestion.Web/Controllers/LoginController.cs" />
+      <File FileName="Gestion.EF/Models/iotdbContext.cs" Line="27" Column="41" />
+      <File FileName="Gestion.EF/Models/Indices.cs" />
+      <File FileName="Gestion.Web/Program.cs" Line="1" Column="1" />
+      <File FileName="Gestion.Web/Startup.cs" Line="1" Column="1" />
+      <File FileName="Gestion.Web/Controllers/HomeController.cs" Line="34" Column="1" />
+      <File FileName="Gestion.EF/Models/Test.cs" Line="1" Column="1" />
+      <File FileName="Gestion.EF/Models/RolesUsuarios.cs" Line="1" Column="1" />
+    </Files>
+    <Pads>
+      <Pad Id="ProjectPad">
+        <State name="__root__">
+          <Node name="Pucheta" expanded="True">
+            <Node name="Gestion.EF" expanded="True">
+              <Node name="Dependencies" expanded="True">
+                <Node name="PackageDependencies" expanded="True" />
+              </Node>
+              <Node name="Models" expanded="True" />
+            </Node>
+            <Node name="Gestion.Negocio" expanded="True" />
+            <Node name="Gestion.Web" expanded="True">
+              <Node name="Dependencies" expanded="True">
+                <Node name="PackageDependencies" expanded="True">
+                  <Node name="System.Drawing.Common" selected="True" />
+                </Node>
+              </Node>
+              <Node name="Controllers" expanded="True" />
+            </Node>
+          </Node>
+        </State>
+      </Pad>
+    </Pads>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
+</Properties>

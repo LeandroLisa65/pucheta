@@ -1,0 +1,13 @@
+/Users/leandrolisa/Projects/082023_PuchetaWEB_test/Gestion.EF/bin/Debug/netcoreapp3.1/Gestion.EF.deps.json
+/Users/leandrolisa/Projects/082023_PuchetaWEB_test/Gestion.EF/bin/Debug/netcoreapp3.1/Gestion.EF.runtimeconfig.json
+/Users/leandrolisa/Projects/082023_PuchetaWEB_test/Gestion.EF/bin/Debug/netcoreapp3.1/Gestion.EF.runtimeconfig.dev.json
+/Users/leandrolisa/Projects/082023_PuchetaWEB_test/Gestion.EF/bin/Debug/netcoreapp3.1/Gestion.EF.dll
+/Users/leandrolisa/Projects/082023_PuchetaWEB_test/Gestion.EF/bin/Debug/netcoreapp3.1/Gestion.EF.pdb
+/Users/leandrolisa/Projects/082023_PuchetaWEB_test/Gestion.EF/obj/Debug/netcoreapp3.1/Gestion.EF.csproj.AssemblyReference.cache
+/Users/leandrolisa/Projects/082023_PuchetaWEB_test/Gestion.EF/obj/Debug/netcoreapp3.1/Gestion.EF.GeneratedMSBuildEditorConfig.editorconfig
+/Users/leandrolisa/Projects/082023_PuchetaWEB_test/Gestion.EF/obj/Debug/netcoreapp3.1/Gestion.EF.AssemblyInfoInputs.cache
+/Users/leandrolisa/Projects/082023_PuchetaWEB_test/Gestion.EF/obj/Debug/netcoreapp3.1/Gestion.EF.AssemblyInfo.cs
+/Users/leandrolisa/Projects/082023_PuchetaWEB_test/Gestion.EF/obj/Debug/netcoreapp3.1/Gestion.EF.csproj.CoreCompileInputs.cache
+/Users/leandrolisa/Projects/082023_PuchetaWEB_test/Gestion.EF/obj/Debug/netcoreapp3.1/Gestion.EF.dll
+/Users/leandrolisa/Projects/082023_PuchetaWEB_test/Gestion.EF/obj/Debug/netcoreapp3.1/Gestion.EF.pdb
+/Users/leandrolisa/Projects/082023_PuchetaWEB_test/Gestion.EF/obj/Debug/netcoreapp3.1/Gestion.EF.genruntimeconfig.cache

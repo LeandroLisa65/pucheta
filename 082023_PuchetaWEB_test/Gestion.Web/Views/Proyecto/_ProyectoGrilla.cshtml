@@ -1,0 +1,323 @@
+﻿@model IEnumerable<Gestion.EF.Models.Proyecto>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="card-title">Listado de Proyectos</h6>
+                <div class="card-tools">
+                    <button type="button" class="btn btn-tool" data-card-widget="collapse" data-toggle="tooltip" title="Colapso">
+                        <i class="fas fa-minus"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-12" id="GrillaKendo" style="margin-top: 0.5em"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="card-title">Listado de Proyectos Ejecutados</h6>
+                <div class="card-tools">
+                    <button type="button" class="btn btn-tool" data-card-widget="collapse" data-toggle="tooltip" title="Colapso">
+                        <i class="fas fa-minus"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-12" id="GrillaKendoEjecutados" style="margin-top: 0.5em"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+
+    function grilla(datos) {
+
+        let lProyectos = datos.filter(p => p.estado != "@Gestion.EF.ValoresUtiles.Estado_Proy_Ejecutado");
+        $("#GrillaKendo").html("<div id='grillaProyecto'></div>");
+        $("#grillaProyecto").kendoGrid({
+            toolbar: ["excel"],
+            excel: {
+                allPages: true,
+                filterable: true
+            },
+            filterable: true,
+            sortable: true,
+            dataSource: lProyectos,
+            detailInit: ubicaciones,
+            columns: [
+
+                { field: "id", title: "Id", width: "70px", media: "(min-width: 850px)",hidden: true },
+                { field: "nombre", title: "Nombre", media: "(min-width: 450px)" },
+                { field: "fecha_Inicio", title: "Fecha Inicio",template: "#= kendo.toString(kendo.parseDate(fecha_Inicio), 'dd/MM/yyyy') #" , media: "(min-width: 450px)" },
+                { field: "duracion", title: "Duracion", media: "(min-width: 450px)" },
+                { field: "usuarios.nombre", title: "Jefe Obra", media: "(min-width: 450px)" },
+                { command: { name: "Contratista", text: "Contratista", click: Contratista }, title: "Contratista", width: "110px", },
+                { command: { name: "Detalle", text: "Gantt", click: getDetalle }, title: "Gantt", width: "110px", },
+                { command: { name: "DetalleRubro", text: "Gantt Rubro", click: getDetalleRubro }, title: "Gantt Rubro", width: "110px", },
+                { command: { name: "Actividades", text:"Planificacion", click: getProyectoAct }, title: "Planificacion", width: "120px" ,},
+                { command: { name: "kedit", text:"", click: Editar }, title: "Editar", width: "65px" , attributes: { style: "text-align:center;" } }
+
+            ], excelExport: function (e) {
+                e.preventDefault();
+
+                var workbook = e.workbook;
+
+                detailExportPromises = [];
+
+                var masterData = e.data;
+
+                for (var rowIndex = 0; rowIndex < masterData.length; rowIndex++) {
+                    exportChildData(masterData[rowIndex].id, rowIndex);
+                }
+
+                $.when.apply(null, detailExportPromises)
+                    .then(function () {
+                        // Get the export results.
+                        var detailExports = $.makeArray(arguments);
+
+                        // Sort by masterRowIndex.
+                        detailExports.sort(function (a, b) {
+                            return a.masterRowIndex - b.masterRowIndex;
+                        });
+
+                        // Add an empty column.
+                        workbook.sheets[0].columns.unshift({
+                            width: 30
+                        });
+
+                        // Prepend an empty cell to each row.
+                        for (var i = 0; i < workbook.sheets[0].rows.length; i++) {
+                            workbook.sheets[0].rows[i].cells.unshift({});
+                        }
+
+                        // Merge the detail export sheet rows with the master sheet rows.
+                        // Loop backwards so the masterRowIndex does not need to be updated.
+                        for (var i = detailExports.length - 1; i >= 0; i--) {
+                            var masterRowIndex = detailExports[i].masterRowIndex + 1; // compensate for the header row
+
+                            var sheet = detailExports[i].sheet;
+
+                            // Prepend an empty cell to each row.
+                            for (var ci = 0; ci < sheet.rows.length; ci++) {
+                                if (sheet.rows[ci].cells[0].value) {
+                                    sheet.rows[ci].cells.unshift({});
+                                }
+                            }
+
+                            // Insert the detail sheet rows after the master row.
+                            [].splice.apply(workbook.sheets[0].rows, [masterRowIndex + 1, 0].concat(sheet.rows));
+                        }
+
+                        // Save the workbook.
+                        kendo.saveAs({
+                            dataURI: new kendo.ooxml.Workbook(workbook).toDataURL(),
+                            fileName: "Export.xlsx"
+                        });
+                    })
+            }
+
+        });
+
+        let lProyectosEjecutados = datos.filter(p => p.estado == "@Gestion.EF.ValoresUtiles.Estado_Proy_Ejecutado");
+        $("#GrillaKendoEjecutados").html("<div id='grillaProyectoEjecutados'></div>");
+        $("#grillaProyectoEjecutados").kendoGrid({
+            toolbar: ["excel"],
+            excel: {
+                allPages: true,
+                filterable: true
+            },
+            filterable: true,
+            sortable: true,
+            dataSource: lProyectosEjecutados,
+            detailInit: ubicaciones,
+            columns: [
+
+                { field: "id", title: "Id", width: "70px", media: "(min-width: 850px)", hidden: true },
+                { field: "nombre", title: "Nombre", media: "(min-width: 450px)" },
+                { field: "fecha_Inicio", title: "Fecha Inicio", template: "#= kendo.toString(kendo.parseDate(fecha_Inicio), 'dd/MM/yyyy') #", media: "(min-width: 450px)" },
+                { field: "duracion", title: "Duracion", media: "(min-width: 450px)" },
+                { field: "usuarios.nombre", title: "Jefe Obra", media: "(min-width: 450px)" },
+                { command: { name: "Contratista", text: "Contratista", click: Contratista }, title: "Contratista", width: "110px", },
+                { command: { name: "Detalle", text: "Gantt", click: getDetalle }, title: "Gantt", width: "110px", },
+                { command: { name: "DetalleRubro", text: "Gantt Rubro", click: getDetalleRubro }, title: "Gantt Rubro", width: "110px", },
+                { command: { name: "Actividades", text: "Planificacion", click: getProyectoAct }, title: "Planificacion", width: "120px", },
+                { command: { name: "kedit", text: "", click: Editar }, title: "Editar", width: "65px", attributes: { style: "text-align:center;" } }
+
+            ], excelExport: function (e) {
+                e.preventDefault();
+
+                var workbook = e.workbook;
+
+                detailExportPromises = [];
+
+                var masterData = e.data;
+
+                for (var rowIndex = 0; rowIndex < masterData.length; rowIndex++) {
+                    exportChildData(masterData[rowIndex].id, rowIndex);
+                }
+
+                $.when.apply(null, detailExportPromises)
+                    .then(function () {
+                        // Get the export results.
+                        var detailExports = $.makeArray(arguments);
+
+                        // Sort by masterRowIndex.
+                        detailExports.sort(function (a, b) {
+                            return a.masterRowIndex - b.masterRowIndex;
+                        });
+
+                        // Add an empty column.
+                        workbook.sheets[0].columns.unshift({
+                            width: 30
+                        });
+
+                        // Prepend an empty cell to each row.
+                        for (var i = 0; i < workbook.sheets[0].rows.length; i++) {
+                            workbook.sheets[0].rows[i].cells.unshift({});
+                        }
+
+                        // Merge the detail export sheet rows with the master sheet rows.
+                        // Loop backwards so the masterRowIndex does not need to be updated.
+                        for (var i = detailExports.length - 1; i >= 0; i--) {
+                            var masterRowIndex = detailExports[i].masterRowIndex + 1; // compensate for the header row
+
+                            var sheet = detailExports[i].sheet;
+
+                            // Prepend an empty cell to each row.
+                            for (var ci = 0; ci < sheet.rows.length; ci++) {
+                                if (sheet.rows[ci].cells[0].value) {
+                                    sheet.rows[ci].cells.unshift({});
+                                }
+                            }
+
+                            // Insert the detail sheet rows after the master row.
+                            [].splice.apply(workbook.sheets[0].rows, [masterRowIndex + 1, 0].concat(sheet.rows));
+                        }
+
+                        // Save the workbook.
+                        kendo.saveAs({
+                            dataURI: new kendo.ooxml.Workbook(workbook).toDataURL(),
+                            fileName: "Export.xlsx"
+                        });
+                    })
+            }
+
+        });
+    }
+
+    function exportChildData(id, rowIndex) {
+        var deferred = $.Deferred();
+
+        detailExportPromises.push(deferred);
+
+        var rows = [{
+            cells: [
+                // First cell.
+                { value: "id" },
+                // Second cell.
+                { value: "nombre" },
+                // Third cell.
+                { value: "descripción" }
+            ]
+        }];
+
+
+
+        var exporter = new kendo.ExcelExporter({
+            columns: [{
+                field: "id"
+            }, {
+                    field: "nombre"
+            }, {
+                    field: "descripción"
+            }],
+            dataSource: ubicaciones
+        });
+
+        exporter.workbook().then(function (book, data) {
+            deferred.resolve({
+                masterRowIndex: rowIndex,
+                sheet: book.sheets[0]
+            });
+        });
+    }
+
+
+    function ubicaciones(e) {
+        console.log(e.data.id);
+        $.get("/Proyecto/getUbicaciones/" + e.data.id).done(function (r) {
+            if (!r.isError) {
+                $("<div/>").appendTo(e.detailCell).kendoGrid({
+                    dataSource: {
+                        data: r.data,
+                    },
+                    scrollable: false,
+                    sortable: true,
+                    serverPaging: true,
+                    serverSorting: true,
+                    serverFiltering: true,
+
+                    filter: { field: "id", operator: "eq", value: e.data.id },
+                    columns: [
+                        { field: "id", title: "Id Ubicación"},
+                        { field: "nombre", title: "Nombre" },
+                        { field: "descripción", title: "Descripción" },
+                    ], excelExport: function (e) {
+                        // Prevent the saving of the file.
+                        e.preventDefault();
+
+                        // Resolve the deferred.
+                        deferred.resolve({
+                            masterRowIndex: masterRowIndex,
+                            sheet: e.workbook.sheets[0]
+                        });
+                    },
+                });
+            }
+        });
+
+    }
+
+
+    function getProyectoAct(e) {
+        console.log('e', e);
+         var d = this.dataItem($(e.currentTarget).closest("tr"));
+         console.log('d', d);
+        window.location.replace("/Planificacion/Proyecto_Actividades/"+d.id);
+
+    }
+
+     function getDetalle(e) {
+        console.log('e', e);
+         var d = this.dataItem($(e.currentTarget).closest("tr"));
+         console.log('d', d);
+        window.location.replace("/Planificacion/Plan_de_Avance/"+d.id);
+
+    }
+
+    function getDetalleRubro(e) {
+        console.log('e', e);
+        var d = this.dataItem($(e.currentTarget).closest("tr"));
+        console.log('d', d);
+        window.location.replace("/Planificacion/Plan_de_Avance_Rubro/" + d.id);
+
+    }
+
+
+    var data = JSON.parse('@Html.Raw(Json.Serialize(Model))');
+
+    grilla(data);
+
+
+</script>
+

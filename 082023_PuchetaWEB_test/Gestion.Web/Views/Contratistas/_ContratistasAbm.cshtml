@@ -1,0 +1,173 @@
+﻿@model Gestion.EF.Models.Contratistas
+
+<div class="row">
+    <div class="col-md-6 ">
+        <input type="hidden" asp-for="Id" />
+        <form asp-action="_RolAbm">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="Nombre" class="control-label"></label>
+                <input asp-for="Nombre" class="form-control" />
+                <span asp-validation-for="Nombre" class="text-danger"></span>
+            </div>
+        </form>
+    </div>
+    <div class="col-md-6">
+        <div class="form-group">
+            <label asp-for="Barrio" class="control-label"></label>
+            <input asp-for="Barrio" type="text" class="form-control">
+            <span asp-validation-for="Barrio" class="text-danger"></span>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="form-group">
+            <label asp-for="Calle" class="control-label"></label>
+            <input asp-for="Calle" type="text" class="form-control">
+            <span asp-validation-for="Calle" class="text-danger"></span>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="form-group">
+            <label asp-for="Altura" class="control-label"></label>
+            <input asp-for="Altura" type="number" class="form-control">
+            <span asp-validation-for="Altura" class="text-danger"></span>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="form-group">
+            <label asp-for="Piso" class="control-label"></label>
+            <input asp-for="Piso" type="text" class="form-control">
+            <span asp-validation-for="Piso" class="text-danger"></span>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="form-group">
+            <label asp-for="Dpto" class="control-label"></label>
+            <input asp-for="Dpto" type="text" class="form-control">
+            <span asp-validation-for="Dpto" class="text-danger"></span>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="form-group">
+            <label asp-for="CP" class="control-label"></label>
+            <input asp-for="CP" type="number" class="form-control">
+            <span asp-validation-for="CP" class="text-danger"></span>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="form-group">
+            <label asp-for="Celular" class="control-label"></label>
+            <input asp-for="Celular" type="number" class="form-control">
+            <span asp-validation-for="Celular" class="text-danger"></span>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="form-group">
+            <label asp-for="Email" class="control-label"></label>
+            <input asp-for="Email" type="text" class="form-control">
+            <span asp-validation-for="Email" class="text-danger"></span>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="form-group">
+            <label class="control-label" asp-for="RubroId"> Rubro: </label>
+            <div id="selectRubro"></div>
+
+        </div>
+    </div>
+
+</div>
+
+
+<div class="row">
+    <div class="col-md-2">
+        <div class="btn-graba" type="button" onclick="GrabarContratistas()"><i class="fas fa-check"></i> Grabar</div>
+    </div>
+    <div class="col-md-2">
+        <div class="btn-cerrar" type="button" data-dismiss="modal"><i class="far fa-times-circle"></i> Cerrar</div>
+    </div>
+    <div class="col-md-8"></div>
+</div>
+
+<script>
+    cargaRubro()
+    var data2 = JSON.parse('@Html.Raw(Json.Serialize(Model))');
+    function GrabarContratistas() {
+
+        var valid = validaDatos('ContratistasModal');
+        if (!valid.isError) {
+
+
+
+            var model = {
+                Id: $('#Id').val(),
+                Nombre: $('#Nombre').val(),
+                Barrio: $('#Barrio').val(),
+                Calle: $('#Calle').val(),
+                Altura: $('#Altura').val(),
+                Piso: $('#Piso').val(),
+                Dpto: $('#Dpto').val(),
+                CP: $('#CP').val(),
+                Celular: $('#Celular').val(),
+                Email: $('#Email').val(),
+                RubroId: $('#selRubro').val(),
+
+
+
+
+            };
+
+
+            $.post("/Contratistas/ContratistasGraba", model).done(function (e) {
+
+                if (!e.isError) {
+                    toastr.success(e.data, { timeOut: 2000 });
+                    $('#ContratistasModal').modal('hide');
+
+                } else {
+                    toastr.error(e.data, { timeOut: 2000 });
+                }
+
+            });
+
+
+        } else {
+            toastr.error(valid.mensaje, { timeOut: 2000 });
+        }
+    }
+    function cargaRubro() {
+        $.get("@Url.Action("GetRubro", "Contratistas")",
+            function (data) {
+
+                if (!data.isError) {
+                    var d = '<select id="selRubro" asp-for="RubroId" class="form-control" >';
+                    d = d + '<option value="0">Seleccione un Rubro</option>';
+                    for (var i = 0; i < data.data.length; i++) {
+                        d = d + '<option value="' + data.data[i].id + '">' + data.data[i].nombre + '</option>';
+                    }
+                    d = d + '</select>';
+
+                    $('#selectRubro').html(d);
+                    $('#selRubro').val(data2.rubroId);
+                    console.log(data2.rubroId);
+                }
+
+
+            }
+        );
+    }
+
+
+</script>

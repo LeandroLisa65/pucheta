@@ -1,0 +1,44 @@
+﻿@model IEnumerable<Gestion.EF.Models.ParteDiario_Contratista>
+
+<div class="row">
+    <div class="col-md-4"> <h6 class="card-title">Listado de Contratistas</h6></div>
+    <div class="col-md-6"></div>
+    <div class="col-md-2"><button class="btn btn-primary" id="btn_Nuevo" onclick="Nuevo()"><i class="far fa-edit"></i> Agregar  Contratista</button></div>
+</div>
+
+<br />
+<div id="GrillaKendo"></div>
+
+
+<script>
+
+    function grilla(datos) {
+        console.log(datos);
+    $("#GrillaKendo").html("<div id='grillaContratista'></div>");
+
+    $("#grillaContratista").kendoGrid({
+        filterable: true,
+        sortable: true,
+        dataSource: {
+            data: datos
+        },
+        columns: [
+
+            { field: "id", title: "Id", width: "60px", media: "(min-width: 850px)" },
+            { field: "parteDiario", title: "Parte Diario", media: "(min-width: 450px)" },
+            { field: "usuarios", title: "Usuarios", media: "(min-width: 450px)" },
+
+
+            { command: { name: "kedit", text:"", click: Editar }, title: "Editar", width: "65px" , attributes: { style: "text-align:center;" } }
+
+        ]
+
+    });
+}
+
+    var data = JSON.parse('@Html.Raw(Json.Serialize(Model))');
+
+    grilla(data);
+
+
+</script>

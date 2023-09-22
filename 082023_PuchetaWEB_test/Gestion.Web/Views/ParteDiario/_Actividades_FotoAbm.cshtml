@@ -1,0 +1,116 @@
+﻿@model Gestion.EF.ItemActividades_Foto
+
+<form method="POST" enctype="multipart/form-data" id="fileUploadForm">
+
+    <div class="row">
+        <div class="col-md-12">
+            <input type="hidden" asp-for="Id" />
+
+            <div class="form-group">
+                <label asp-for="ParteDiario_ActividadesId" class="control-label"></label>
+
+                @Html.DropDownListFor(model =>
+                    model.ParteDiario_ActividadesId,
+                    new SelectList(Model.ParteDiario_Actividades, "Id", "Id")
+                    , new { @class = "form-control" }
+                )
+
+
+            </div>
+
+        </div>
+    </div>
+
+
+
+    <div id="conten_addFile" class="row">
+        <div class="col-md-12">
+            <label class="control-label">Adjuntar Archivo</label>
+        </div>
+        <div class="col-md-12">
+            <div class="form-group">
+                <input asp-for="File01" class="form-control custom-file-input" />
+                <label asp-for="File01" class="custom-file-label "></label>
+            </div>
+        </div>
+    </div>
+
+
+
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="form-group">
+                <button type="button" class="btn btn-primary" onclick="GrabarActividades_Foto()"> Grabar </button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal"> Cerrar </button>
+            </div>
+        </div>
+    </div>
+
+</form>
+
+<script>
+
+   
+    
+    function cargaParteDiario_Actividades(Id) {
+
+        $.get("@Url.Action("getParteDiarioActividades", "ParteDiario")",
+            function (data) {
+                console.log(data);
+                if (!data.isError) {
+                    var d = '<select id="ParteDiario_ActividadesId" class="form-control">';
+                    for (var i = 0; i < data.data.length; i++) {
+                        d = d + '<option value="' + data.data[i].id + '">' + data.data[i].id + " - Parte Diario Actividad"+ '</option>';
+                    }
+                    d = d + '</select>';
+
+                    $('#conten_pa').html(d);
+
+                    if (Id != undefined) {
+                        $('#ParteDiario_ActividadesId').val(Id);
+                    }
+                }
+
+            });
+    }
+
+    function GrabarActividades_Foto() {
+
+        var valid = validaDatos('Actividades_FotoModal');
+        if (!valid.isError) {
+
+            var form = $('#fileUploadForm')[0];
+            var model = new FormData(form);
+            $("#GrabarActividades_Foto").prop("disabled", true);
+            console.log(model);
+            $.ajax({
+                type: "POST",
+                enctype: 'multipart/form-data',
+                url: "/ParteDiario/Actividades_FotoAbm_Graba",
+                data: model,
+                processData: false,
+                contentType: false,
+                cache: false,
+                timeout: 600000,
+                success: function (e) {
+
+                    if (!e.isError) {
+                        toastr.success(e.data, { timeOut: 2000 });
+                        $('#Actividades_FotoModal').modal('hide');
+                    } else {
+                        toastr.error(e.data, { timeOut: 2000 });
+                    }
+
+                }
+            });
+
+
+        } else {
+            toastr.error(valid.mensaje, { timeOut: 2000 });
+        }
+    }
+
+
+</script>
+

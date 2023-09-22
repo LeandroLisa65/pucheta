@@ -1,0 +1,84 @@
+﻿
+@{
+    ViewData["Title"] = "Roles";
+    Layout = "~/Views/Shared/_LayoutGestion.cshtml";
+}
+
+<div class="row">
+    <div class="col-lg-12">
+        <div class="card card-primary card-outline">
+            <div class="card-header">
+                <h5 class="m-0">Gestión de Roles</h5>
+            </div>
+            <div id="conten_RolesGrilla" class="card-body">
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade  bd-example-modal-lg"
+     id="RolesModal"
+     tabindex="-1"
+     role="dialog"
+     aria-labelledby="myLargeModalLabel"
+     aria-hidden="true"
+     data-backdrop="static">
+    <div class="modal-dialog  modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 id="ModalTitulo" class="modal-title"></h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+@section scripts  {
+
+    <script>
+
+        cargaRolesGrilla();
+
+        function cargaRolesGrilla() {
+            var urlAction = '@Url.Action("_RolesGrilla","Gestion")';
+            $("#conten_RolesGrilla").load(urlAction);
+        }
+
+        function Editar(e) {
+
+            var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+            var id = dataItem.id;
+
+            $('#ModalTitulo').html(" Editar Roles");
+                $.get("@Url.Action("_RolesAbm","Gestion")/" + id,
+                    function (data) { $('.modal-body').html(data); })
+                $('#RolesModal').modal('show');
+            }
+
+        function Nuevo() {
+            $('#ModalTitulo').html(" Agregar Roles");
+            $.get("@Url.Action("_RolesAbm","Gestion")/0",
+                function (data) { $('.modal-body').html(data); })
+            $('#RolesModal').modal('show');
+        }
+
+        $('#RolesModal').on('hidden.bs.modal', function (e) {
+            $('.modal-body').html("");
+            cargaRolesGrilla();
+        })
+
+
+
+    </script>
+
+}
+

@@ -1,0 +1,214 @@
+﻿@model Gestion.EF.AccionesEdit
+
+
+<div class="row">
+    <div class="col-md-12">
+
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <input type="hidden" asp-for="Accion.Id" />
+
+        <div class="row">
+            <div class="col-md-12">
+                <div class="form-group">
+                    <label asp-for="Accion.Detalle" class="control-label"></label>
+                    <input asp-for="Accion.Detalle" class="form-control" />
+                    <span asp-validation-for="Accion.Detalle" class="text-danger"></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-12">
+                <div class="form-group">
+                    @Html.DropDownList("ddlMenuP", Model.ddlMenu.Select(item => new SelectListItem
+                    {
+                        Value = item.nId.ToString(),
+                        Text = item.Detalle,
+                        Selected = Model.Accion.MenuId == item.nId ? true : false
+                    }), new { @class = "form-control", @required = "required" })
+
+                </div>
+            </div>
+        </div>
+
+
+        <div class="row" style="padding: 20px; background-color: aliceblue;">
+            <div class="col-md-12">
+
+                <h5>Permisos de edicion en esta acción </h5>
+                <hr />
+
+            </div>
+
+            <div class="col-md-6">
+                <!--Html.CheckBoxFor(model => model.Accion.Editar, Model.Accion.MenuId == 'w' ? true : false)-->
+               
+                <div class="form-group">                   
+                    <div class="icheck-primary d-inline">
+                        <input type="checkbox" id="Accion_Editar" @(Model.Accion.Editar ? "checked=\"checked\"" : "")>
+                        <label for="Accion_Editar">@Html.DisplayNameFor(model => model.Accion.Editar)</label>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">                  
+                    <div class="icheck-primary d-inline">
+                        <input type="checkbox" id="Accion_Borrar" @(Model.Accion.Borrar ? "checked=\"checked\"" : "")>
+                        <label for="Accion_Borrar">@Html.DisplayNameFor(model => model.Accion.Borrar)</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="form-group">                   
+                    <div class="icheck-primary d-inline">
+                        <input type="checkbox" id="Accion_OcultarZona1" @(Model.Accion.OcultarZona1 ? "checked=\"checked\"" : "")>
+                        <label for="Accion_OcultarZona1">@Html.DisplayNameFor(model => model.Accion.OcultarZona1)</label>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <div class="icheck-primary d-inline">
+                        <input type="checkbox" id="Accion_OcultarZona2" @(Model.Accion.OcultarZona2 ? "checked=\"checked\"" : "")>
+                        <label for="Accion_OcultarZona2">@Html.DisplayNameFor(model => model.Accion.OcultarZona2)</label>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <div class="icheck-primary d-inline">
+                        <input type="checkbox" id="Accion_OcultarZona3" @(Model.Accion.OcultarZona3 ? "checked=\"checked\"" : "")>
+                        <label for="Accion_OcultarZona3">@Html.DisplayNameFor(model => model.Accion.OcultarZona3)</label>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <div class="icheck-primary d-inline">
+                        <input type="checkbox" id="Accion_OcultarZona4" @(Model.Accion.OcultarZona4 ? "checked=\"checked\"" : "")>
+                        <label for="Accion_OcultarZona4">@Html.DisplayNameFor(model => model.Accion.OcultarZona4)</label>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-12">
+                <hr />
+            </div>
+
+        </div>
+
+        <div class="row" style="padding: 20px;">
+
+            <div class="col-md-3"></div>
+            <div class="col-md-3">
+                <div class="form-group">                   
+                    <div class="icheck-primary d-inline">
+                        <input type="checkbox" id="Accion_Activo" @(Model.Accion.Activo ? "checked=\"checked\"" : "") >
+                        <label for="Accion_Activo">@Html.DisplayNameFor(model => model.Accion.Activo)</label>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <div class="icheck-primary d-inline">
+                        <input type="checkbox" id="Accion_Borrado" @(Model.Accion.Borrado ? "checked=\"checked\"" : "")>
+                        <label for="Accion_Borrado">@Html.DisplayNameFor(model => model.Accion.Borrado)</label>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3"></div>
+        </div>
+               
+        <div class="row">
+            <div class="col-md-12">
+                <div class="form-group">
+                    <button type="button" class="btn btn-primary" onclick="GrabarAccion()"> Grabar </button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal"> Cerrar </button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+
+    function GrabarAccion() {
+
+        var valid = validaDatos('AccionesModal');
+        if (!valid.isError) {        
+            var activo = false;
+            if ($('#Accion_Activo').prop('checked')) {
+                activo = true;
+            }
+
+            var borrado = false;
+            if ($('#Accion_Borrado').prop('checked')) {
+                borrado = true;
+            }
+
+            var borrar = false;
+            if ($('#Accion_Borrar').prop('checked')) {
+                borrar = true;
+            }
+
+            var editar = false;
+            if ($('#Accion_Editar').prop('checked')) {
+                editar = true;
+            }
+
+            var ocultarzona1 = false;
+            if ($('#OcultarZona1_Editar').prop('checked')) {
+                ocultarzona1 = true;
+            }
+            var ocultarzona2 = false;
+            if ($('#OcultarZona2_Editar').prop('checked')) {
+                ocultarzona2 = true;
+            }
+            var ocultarzona3 = false;
+            if ($('#OcultarZona3_Editar').prop('checked')) {
+                ocultarzona3 = true;
+            }
+            var ocultarzona4 = false;
+            if ($('#OcultarZona4_Editar').prop('checked')) {
+                ocultarzona4 = true;
+            }
+
+            var model = {
+                Id: $('#Accion_Id').val(),
+                Detalle: $('#Accion_Detalle').val(),
+                Activo: activo,
+                Borrado: borrado,
+                Borrar: borrar,
+                Editar: editar,
+                MenuId: $('#ddlMenuP').val(),
+                MenuDetalle: $("#ddlMenuP option:selected").text(),
+                OcultarZona1: ocultarzona1,
+                OcultarZona2: ocultarzona2,
+                OcultarZona3: ocultarzona3,
+                OcultarZona4: ocultarzona4
+            }
+            
+            $.post("/Gestion/AccionesGraba", model).done(function (e) {
+                console.log(e);
+                if (!e.isError) {
+                    toastr.success(e.data, { timeOut: 2000 });
+                    $('#AccionesModal').modal('hide');
+
+                } else {
+                    toastr.error(e.data, { timeOut: 2000 });
+                }
+
+            });
+
+        } else {
+            toastr.error(valid.mensaje, { timeOut: 2000 });
+        }
+    }
+
+
+</script>
+
+
+
+

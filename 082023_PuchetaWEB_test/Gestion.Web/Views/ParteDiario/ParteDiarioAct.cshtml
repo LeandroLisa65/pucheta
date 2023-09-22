@@ -1,0 +1,103 @@
+﻿@model Gestion.EF.ReturnData
+
+@{
+    ViewData["Title"] = "ParteDiarioAct";
+    Layout = "~/Views/Shared/_LayoutGestion.cshtml";
+}
+
+<div  class="row" >
+    <div class="col-lg-12">
+        <div class="card  card-rojo">
+            <div class="card-header cabecera">
+                <div class="btn-cerrargantt" style="float:right;" type="button" onclick="Volver()"><i class="fas fa-arrow-left"></i> Volver</div>
+                <h5 class="m-0">Gestión de Parte Diario</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div style="margin-bottom:15px;" class="col-md-12">
+                        <h6 class="card-title">Detalle de Parte Diario</h6>
+                    </div>
+                    <div class="col-md-12">
+                        <input id="id_Proyecto" type="hidden" />
+                        <div id="conten_ABM"></div>
+                        <hr />
+                    </div>
+                    <nav>
+                        <div class="nav nav-tabs" id="nav-tabAct" role="tablist">
+                            <a class="nav-item nav-link active" id="nav-gri1-tab" data-toggle="tab" href="#nav-gri1" role="tab" aria-controls="nav-gri1" aria-selected="true">Actividad</a>
+                            <a class="nav-item nav-link " id="nav-gri2-tab" data-toggle="tab" href="#nav-gri2" role="tab" aria-controls="nav-gri2" aria-selected="false">Asistencia del Personal</a>
+                            <a class="nav-item nav-link " id="nav-gri3-tab" data-toggle="tab" href="#nav-gri3" role="tab" aria-controls="nav-gri3" aria-selected="false">Novedades/Incidentes</a>
+                        </div>
+                    </nav>
+
+
+                    <div class="tab-content" id="nav-tabContent">
+
+                        <div class="tab-pane fade  show active" id="nav-gri1">
+                            <div class="col-md-12">
+                                <br />
+                                <h5 id="titulosGrilla"></h5>
+                                <div id="conten_ParteD_ActividadesEditGrilla"></div>
+                                <br />
+                            </div>
+                        </div>
+                        <div class="tab-pane fade " id="nav-gri2">
+
+                            <div class="col-md-12">
+                                Resumen de Asistencia: <b><span id="P_asistencia"></span></b> <br />
+                                <div id="Conte_grillaAsitencias"></div>
+                                <br />
+
+                            </div>
+                        </div>
+                        <div class="tab-pane fade  " id="nav-gri3">
+                            <br />
+                            <h5 id="tituloInciditendes"></h5>
+                            <div id="Conte_grillaIncidente"></div>
+                            <br />
+                        </div>
+
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section scripts  {
+
+
+    <script>
+        var data = JSON.parse('@Html.Raw(Json.Serialize(Model))');
+
+        console.log('dataVer',data);
+        if (data.data > 0) {
+            $('#conten_ABM').hide();
+
+            $('#id_Proyecto').val(data.data);
+        } else {
+            $('#id_Proyecto').val(0);
+            $('#nav-tabAct').hide();
+        }
+        var estadoParteDiarioActividades_Filtro = { Ubicacion: '0', Actividad:'0', AvanceDia: '0', AvanceAyer: 'CA', Avance: '0' };
+        localStorage.setItem('ValoresFiltroParteDiario', JSON.stringify(estadoParteDiarioActividades_Filtro));
+        console.log("Limpio el LocalStorage",0);
+        Nuevo();
+
+        function Nuevo() {
+            $.get("@Url.Action("_ParteDiarioAbm","ParteDiario")/0",
+                function (data) {
+                    $('#conten_ABM').html(data);
+
+                })
+        }
+
+        function Volver() {
+            window.location.replace("/ParteDiario/ParteDiario");
+        }
+
+    </script>
+}

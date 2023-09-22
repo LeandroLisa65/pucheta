@@ -1,0 +1,95 @@
+﻿@model Gestion.EF.ItemProyecto_Ubicaciones
+
+<div class="row">
+    <div class="col-md-12 ">
+        <input type="hidden" asp-for="pu.Id" />
+        <form asp-action="_RolAbm">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="pu.Nombre" class="control-label"></label>
+                <input asp-for="pu.Nombre" class="form-control" />
+                <span asp-validation-for="pu.Nombre" class="text-danger"></span>
+            </div>
+        </form>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <div class="form-group">
+            <label asp-for="pu.Descripción" class="control-label"></label>
+            <textarea asp-for="pu.Descripción" class="form-control" rows="2" cols="20"></textarea>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="form-group">
+            <label asp-for="pu.ProyectoId" class="control-label"></label>
+            @Html.DropDownListFor(model =>
+                model.pu.ProyectoId,
+                new SelectList(Model.Proyecto, "Id", "Nombre")
+                , new { @class = "form-control" }
+            )
+
+        </div>
+
+    </div>
+</div>
+
+
+<div id="conten_botones_grabaProyecto" class="row">
+    <div class="col-md-2">
+        <div class="btn-graba" type="button" onclick="GrabarProyecto_Ubicaciones()"><i class="fas fa-check"></i> Grabar</div>
+    </div>
+    <div class="col-md-2">
+        <div class="btn-cerrar" type="button" data-dismiss="modal"><i class="far fa-times-circle"></i> Cerrar</div>
+    </div>
+    <div class="col-md-8"></div>
+</div>
+
+
+
+<script>
+
+    function GrabarProyecto_Ubicaciones() {
+
+        var valid = validaDatos('Proyecto_UbicacionesModal');
+        if (!valid.isError) {
+
+            if ($('#pu_Nombre').val() == "") {
+                toastr.error("Existen campos incompletos", { timeOut: 2000 });
+                return;
+            }
+
+            var model = {
+                Id: $('#pr_Id').val(),
+                Nombre: $('#pu_Nombre').val(),
+                Descripción: $('#pu_Descripci_n').val(),
+                ProyectoId: $('#pu_ProyectoId').val(),
+               
+
+            };
+
+            $.post("/Proyecto/Proyecto_UbicacionesGraba", model).done(function (e) {
+
+                if (!e.isError) {
+                    toastr.success(e.data, { timeOut: 2000 });
+                   $('#Proyecto_UbicacionesModal').modal('hide');
+                    
+                   
+                } else {
+                    toastr.error(e.data, { timeOut: 2000 });
+                }
+
+            });
+
+
+        } else {
+            toastr.error(valid.mensaje, { timeOut: 2000 });
+        }
+    }
+
+
+</script>
+

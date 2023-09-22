@@ -1,0 +1,712 @@
+﻿@model Gestion.EF.ItemIncidentesHistorial
+
+
+<div id="conten_DatosPrincipales">
+    <div class="row">
+        <div class="col-md-12">
+            <h5 class="card-title"><strong>Datos iniciales</strong></h5>
+            <br />
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-2">
+            <label class="control-label">Id:</label>
+            <input asp-for="ih.Id" class="form-control" disabled />
+        </div>
+        <div class="col-md-4">
+            <label class="control-label">Incidente/Accidente</label>
+            <div id="Conten_Incidentes"></div>
+        </div>
+        
+        <div class="col-md-3">
+            <label asp-for="ih.Creacion_Fecha" class="control-label"></label>
+            <input id="dtpFechaInicio" asp-for="ih.Creacion_Fecha" type="date" name="partydate" class="form-control">
+            <span asp-validation-for="ih.Creacion_Fecha" class="text-danger"></span>
+        </div>
+        <div class="col-md-3">
+            <label asp-for="ih.Fecha_Cierre" class="control-label"></label>
+            <input id="dtpFechaCierre" asp-for="ih.Fecha_Cierre" type="date" name="partydate" class="form-control">
+            <span asp-validation-for="ih.Fecha_Cierre" class="text-danger"></span>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <label asp-for="ih.Creacion_Descripcion" class="control-label"></label>
+            @Html.TextAreaFor(model => model.ih.Creacion_Descripcion, new { @class = "form-control" })
+            <span asp-validation-for="ih.Creacion_Descripcion" class="text-danger"></span>
+        </div>
+    </div>
+    <div class="row">
+        @*AREA ASIGNADA - PROYECTO - CONTRATISTA*@
+        <div class="col-md-4">
+            <label class="control-label">Solicitado Por</label>
+            <input id="f_SolicitadoPor" type="text" class="form-control">
+            <input id="f_SolicitadoPorId" type="hidden" class="form-control">
+            <span class="text-danger"></span>
+        </div>
+        <div class="col-md-4">
+            <label class="control-label">Proyecto Relacionado</label>
+            <div id="Conten_Proyecto"></div>
+        </div>
+        <div class="col-md-4">
+            <label class="control-label">Contratistas Relacionado</label>
+            <div id="Conten_Contratistas"></div>
+        </div>
+    </div>
+    <hr />
+</div>
+
+@*SECCION DE TRATAMIENTO*@
+<div id="conten_Tratamiento">
+    <div class="row">
+        <div class="col-md-12">
+            <h5 class="card-title"><strong>Información de Tratamiento/Solución Propuesta</strong></h5>
+            <br />
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <label>Descripción - Comentario - Solución Propuesta</label>
+            @Html.TextAreaFor(model => model.ih.sDetalleTratamiento, new { @class = "form-control" })
+            <span class="text-danger"></span>
+        </div>
+    </div>
+    <hr />
+</div>
+
+@*SECCION CARGA ARCHIVOS*@
+<div>
+    <div class="row">
+        <div class="col-md-12">
+            <h5 class="card-title"><strong>Archivos Adjuntos</strong></h5>
+            <br />
+        </div>
+    </div>
+    <div class="row">
+        <div id="divFUAbmIncidentes" class="col-md-12">
+            <input type="file"
+                   id="inpFUAbmIncidentes"
+                   onchange="SubirArchivos()"
+                   multiple
+                   class="form-control"
+                   accept="image/*, application/pdf,.csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" />
+        </div>
+        <div id="divGrillaAAAbmIncidentes" clss="col-md-12"></div>
+    </div>
+    <hr />
+</div>
+
+@*SECCION DE SEGUIMIENTO -- ANULADO*@
+<div id="conten_Seguimiento">
+    <div class="row">
+        <div class="col-md-12">
+            <h5 class="card-title"><strong>Información de seguimiento</strong></h5>
+            <br />
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6">
+            <input type="hidden" asp-for="ih.Id" />
+            @{
+                List<ItemSelectList> listItemsT = new List<ItemSelectList> {
+                new ItemSelectList { Value = "1", Text = "Abierto" },
+                new ItemSelectList { Value = "2", Text = "Tratamiento" },
+                new ItemSelectList { Value = "3", Text = "Enviado" },
+                new ItemSelectList { Value = "4", Text = "Validacion" },
+                new ItemSelectList { Value = "50", Text = "Cerrado" },
+                new ItemSelectList { Value = "99", Text = "Cancelado" },
+            };
+            }
+            <label asp-for="ih.EstadoId" class="control-label"></label>
+            @Html.DropDownListFor(model =>
+                model.ih.EstadoId,
+                new SelectList(listItemsT, "Value", "Text")
+                , new { @class = "form-control" }
+            )
+        </div>
+        <div class="col-md-6">
+            <label class="control-label">Area Asignada</label>
+            <div id="Conten_AsignadaArea"></div>
+        </div>
+    </div>
+    <hr />
+</div>
+
+@*SECCION DE ACCIONES DISPONIBLES*@
+<div id="conten_Acciones">
+    <div class="row">
+        <div class="col-md-12">
+            <h5 class="card-title"><strong>Acciones Disponibles</strong></h5>
+            <br />
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-5">
+            <div id="Conten_Acciones"></div>
+        </div>
+        <div class="col-md-5">
+            <div id="Conten_AsignacionArea"></div>
+        </div>
+        <div class="col-md-2">
+            <div class="btn-graba" type="button" onclick="EjecutarAccion()"><i class="fas fa-check"></i> Ejecutar</div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-2">
+            <br />
+            <div onclick="Checkemail()">
+                <label>@Html.CheckBoxFor(m => m.AgregarEmail) @Html.DisplayNameFor(m => m.AgregarEmail)</label>
+            </div>
+        </div>
+        <div id="IngreseEmailExtra" class="col-md-10" style="display:none">
+            <div class="form-group">
+                <label asp-for="IngresarEmail" class="control-label"></label>
+                <input asp-for="IngresarEmail" class="form-control" />
+                <span asp-validation-for="IngresarEmail" class="text-danger"></span>
+                <small class="form-text text-muted red" style="color:red">Para agregar mas de un destinatario sepárelos con ',' (coma)</small>
+            </div>
+        </div>
+    </div>
+    <br />
+</div>
+
+@*SECCION DE HISTORIAL DE LOS CAMBIOS DEL INCIDENTE*@
+<div class="card">
+    <div class="card-header">
+        <div class="card-tools">
+            <button type="button" class="btn btn-tool" data-card-widget="collapse" data-toggle="tooltip" title="Colapso">
+                <i class="fas fa-minus"></i>
+            </button>
+        </div>
+        <h3><font style="vertical-align: inherit;"><strong>Historial del Incidente</strong></font></h3>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class=" col-sm-12 col-md-12">
+                <div style="display: block;">
+                    <div id="conten_GrillaIncidentesHIstorial_Detalle"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+
+    //#region INICIALIZACIÓN
+
+    var IdRegistro = $('#ih_Id').val();
+    var EstadoId = $('#ih_EstadoId').val();
+    //// LIMPIEZA DE JSON
+    JSON.stringify = JSON.stringify || function (obj) {
+        var t = typeof (obj);
+        if (t != "object" || obj === null) {
+            // simple data type
+            if (t == "string") obj = '"' + obj + '"';
+            return String(obj);
+        }
+        else {
+            // recurse array or object
+            var n, v, json = [], arr = (obj && obj.constructor == Array);
+            for (n in obj) {
+                v = obj[n]; t = typeof (v);
+                if (t == "string") v = '"' + v + '"';
+                else if (t == "object" && v !== null) v = JSON.stringify(v);
+                json.push((arr ? "" : '"' + n + '":') + String(v));
+            }
+            var rawString = (arr ? "[" : "{") + String(json) + (arr ? "]" : "}");
+            return rawString;
+        }
+    };
+    function escape(key, val) {
+        if (typeof (val) != "string") return val;
+
+        var replaced = val
+        return replaced;
+    }
+    JSON.stringifyEscaped = function (obj) {
+        return JSON.stringify(obj, escape);
+    }
+    //// FIN LIMPIEzA JSON
+
+
+    // **********************************************************************************************************************************************************
+    // * 1 - CARGO LOS DATOS DEL MODELO
+    // **********************************************************************************************************************************************************
+    //var data2 = JSON.parse('@Html.Raw(Json.Serialize(Model))');
+    var data2 = JSON.parse(JSON.stringifyEscaped(@Html.Raw(Json.Serialize(Model))));
+    var UsuarioLogueadoId = data2.mIdUsuarioActual;
+    var UsuarioCreadorIncidenteId = data2.ih.creacion_UsuarioId;
+
+    if ($('#ih_EstadoId').val() == "1")
+    {
+        $('#f_SolicitadoPor').val(data2.mUsuarioActual);
+        $('#f_SolicitadoPorId').val(data2.mIdUsuarioActual);
+    }
+    else {
+        $('#f_SolicitadoPor').val(data2.ih.sUsuarioDueño);
+        $('#f_SolicitadoPorId').val(data2.ih.creacion_UsuarioId);
+    }
+
+    // **********************************************************************************************************************************************************
+    // * 2 - HABILITO DESHABILITO SECCIONES A VER/MOSTRAR
+    // **********************************************************************************************************************************************************
+    var cmbArea_Disable = true;
+    var cmbProyecto_Disable = true;
+    var cmbContratistas_Disable = true;
+    var cmbIncidentes_Disable = true;
+
+    $('#conten_DatosPrincipales').show();
+    document.getElementById("dtpFechaInicio").disabled = true;
+    document.getElementById("f_SolicitadoPor").disabled = true;
+    document.getElementById("ih_EstadoId").disabled = true;
+    document.getElementById("dtpFechaCierre").disabled = true;
+
+    $('#conten_Seguimiento').hide();
+    $('#conten_Tratamiento').hide();
+    $('#conten_Acciones').hide();
+    $('#Conten_AsignacionArea').hide();
+    $('#conten_Acciones').show();
+    var lArchivosAdjuntos = [];
+    if (IdRegistro == "0") {
+        //Es un registro nuevo, se habiltian todos los campos
+        document.getElementById("ih_Creacion_Descripcion").disabled = false;
+        document.getElementById("dtpFechaCierre").disabled = false;
+        cmbArea_Disable = false;
+        cmbProyecto_Disable = false;
+        cmbContratistas_Disable = false;
+        cmbIncidentes_Disable = false;
+        cargaAcciones(1);
+    }
+    else {
+        lArchivosAdjuntos = data2.lArchivosAdjuntos;
+        lArchivosAdjuntos.forEach(aa => aa.yaEsRelacion = true);
+        CargarGrillaArchivosAdjuntos();
+    }
+    //Verifico que estado tiene
+    if ($('#ih_EstadoId').val() == "1") {
+        //ABIERTO - Como esta en estado inicial es como si fuera nuevo
+        document.getElementById("ih_Creacion_Descripcion").disabled = false;
+        cmbArea_Disable = false;
+        cmbProyecto_Disable = false;
+        cmbContratistas_Disable = false;
+        cmbIncidentes_Disable = false;
+        cargaAcciones(1);
+    }
+    //Verifico que estado tiene
+    if ($('#ih_EstadoId').val() == "2" || $('#ih_EstadoId').val() == "3") {
+        //TRATAMIENTO -
+        document.getElementById("ih_Creacion_Descripcion").disabled = true;
+        cmbArea_Disable = true;
+        cmbProyecto_Disable = true;
+        cmbContratistas_Disable = true;
+        cmbIncidentes_Disable = true;
+        $('#conten_Tratamiento').show();
+        cargaAcciones(2);
+    }
+    if ($('#ih_EstadoId').val() == "4") {
+        //TRATAMIENTO -
+        document.getElementById("ih_Creacion_Descripcion").disabled = true;
+        cmbArea_Disable = true;
+        cmbProyecto_Disable = true;
+        cmbContratistas_Disable = true;
+        cmbIncidentes_Disable = true;
+        $('#conten_Tratamiento').show();
+        cargaAcciones(4);
+    }
+    if ($('#ih_EstadoId').val() == "50") {
+        //TRATAMIENTO -
+        document.getElementById("ih_Creacion_Descripcion").disabled = true;
+        cmbArea_Disable = true;
+        cmbProyecto_Disable = true;
+        cmbContratistas_Disable = true;
+        cmbIncidentes_Disable = true;
+        $('#conten_Acciones').hide();
+    }
+    if ($('#ih_EstadoId').val() == "99") {
+        //TRATAMIENTO -
+        document.getElementById("ih_Creacion_Descripcion").disabled = true;
+        cmbArea_Disable = true;
+        cmbProyecto_Disable = true;
+        cmbContratistas_Disable = true;
+        cmbIncidentes_Disable = true;
+        $('#conten_Acciones').hide();
+    }
+
+    //INICIO - ARMADO DE FECHA EN LOS TEXT DEL FILTRO
+    var d = new Date();
+    var d2 = new Date();
+    d2.setDate(d2.getDate() + 5);
+
+    var month = d.getMonth() + 1;
+    var day = d.getDate();
+    var year = d.getFullYear();
+
+    var month2 = d2.getMonth() + 1;
+    var day2 = d2.getDate();
+    var year2 = d2.getFullYear();
+
+    if (month < 10)
+        month = '0' + month;
+    if (day < 10)
+        day = '0' + day;
+    if (month2 < 10)
+        month2 = '0' + month2;
+    if (day2 < 10)
+        day2 = '0' + day2;
+    var mFechaHoy = year + "-" + month + "-" + day;
+    var mFechaFuturo = year2 + "-" + month2 + "-" + day2;
+
+    var dateControl = document.querySelector('input[id="dtpFechaInicio"]');
+    var dateControls = document.querySelector('input[id="dtpFechaCierre"]');
+
+    if (dateControl.value == "0001-01-01") {
+        dateControl.value = mFechaHoy;
+        dateControls.value = mFechaFuturo;
+    }
+
+    // **********************************************************************************************************************************************************
+    // * 3 - CARGA DE COMBOS
+    // **********************************************************************************************************************************************************
+    
+    cargaProyectos(data2.ih.proyectoId, cmbProyecto_Disable);
+    cargaContratistas(data2.ih.contratistasId, cmbContratistas_Disable);
+    cargaIncidentes(data2.ih.incidenteId, cmbIncidentes_Disable);
+   // cargaProyectosKendo();
+    //Esto se anula por que no se usa mas la seccion de seguimiento
+    //cargaAreas(data2.ih.areaId, cmbArea_Disable);
+    cargaAreasParaAsignar(data2.ih.areaId);
+    grilla_detalle(data2.lstHistorialDetalle);
+
+    //#endregion
+
+    //#region FUNCIONES
+
+    function cargaAreas(idArea, esDisable) {
+        $.get("@Url.Action("GetAreasEmpresa", "Incidentes")",
+            function (data) {
+
+                if (!data.isError) {
+                    var d = '<select id="Area" class="form-control">';
+                    d = d + '<option value="0">Seleccione un area</option>';
+                    for (var i = 0; i < data.data.length; i++) {
+                        d = d + '<option value="' + data.data[i].id + '">' + data.data[i].detalle + '</option>';
+                    }
+                    d = d + '</select>';
+
+                    $('#Conten_AsignadaArea').html(d);
+                    $('#Area').val(idArea);
+                    $("#Area").prop("disabled", esDisable);
+                }
+
+            }
+        );
+    }
+
+    function cargaAreasParaAsignar(idArea) {
+
+        $.get("@Url.Action("GetAreasEmpresa", "Incidentes")",
+            function (data) {
+
+                if (!data.isError) {
+                    var d = '<select id="AreaParaAsignar" class="form-control">';
+                    d = d + '<option value="0">Seleccione un area</option>';
+                    for (var i = 0; i < data.data.length; i++) {
+                        d = d + '<option value="' + data.data[i].id + '">' + data.data[i].detalle + '</option>';
+                    }
+                    d = d + '</select>';
+
+                    $('#Conten_AsignacionArea').html(d);
+                    $('#AreaParaAsignar').val(idArea);
+                }
+
+            }
+        );
+    }
+
+    function cargaProyectos(idProyecto, esDisable) {
+
+        $.get("@Url.Action("GetProyecto", "Incidentes")",
+            function (data) {
+                console.log(data);
+                if (!data.isError) {
+                    var d = '<select id="Proyecto" class="form-control">';
+                    d = d + '<option value="0">Seleccione un proyecto</option>';
+                    for (var i = 0; i < data.data.length; i++) {
+                        d = d + '<option value="' + data.data[i].id + '">' + data.data[i].nombre + '</option>';
+                    }
+                    d = d + '</select>';
+
+                    $('#Conten_Proyecto').html(d);
+                    $('#Proyecto').val(idProyecto);
+                    $("#Proyecto").prop("disabled", esDisable);
+                }
+
+            }
+        );
+    }
+
+    function cargaContratistas(idContratista, esDisable) {
+
+        $.get("@Url.Action("GetContratistas", "Incidentes")",
+            function (data) {
+
+                if (!data.isError) {
+                    var d = '<select id="Contratista" class="form-control">';
+                    d = d + '<option value="0">Seleccione un Contratista</option>';
+                    for (var i = 0; i < data.data.length; i++) {
+                        d = d + '<option value="' + data.data[i].id + '">' + data.data[i].nombre + '</option>';
+                    }
+                    d = d + '</select>';
+
+                    $('#Conten_Contratistas').html(d);
+
+                    $('#Contratista').val(idContratista);
+                    $("#Contratista").prop("disabled", esDisable);
+                }
+
+            }
+        );
+    }
+
+    function cargaIncidentes(idIncidente, esDisable) {
+
+        $.get("@Url.Action("GetIncidentes", "Incidentes")",
+            function (data) {
+
+                if (!data.isError) {
+                    var d = '<select id="incidente" class="form-control">';
+                    d = d + '<option value="0">Seleccione un tipo incidente</option>';
+                    for (var i = 0; i < data.data.length; i++) {
+                        if (data.data[i].rectype == "Incidente/Accidente") {
+                            d = d + '<option value="' + data.data[i].id + '">' + data.data[i].nombre + '</option>';
+                        }
+                    }
+                    d = d + '</select>';
+
+                    $('#Conten_Incidentes').html(d);
+
+                    $('#incidente').val(idIncidente);
+                    $("#incidente").prop("disabled", esDisable);
+                }
+
+            }
+        );
+    }
+
+    function cargaAcciones(idEstado) {
+
+        var d = '<select id="Acciones" class="form-control">';
+        d = d + '<option value="0">Seleccione una accion</option>';
+
+        if (idEstado == 1) {
+            d = d + '<option value="1">Grabar solamente</option>';
+            d = d + '<option value="3">Grabar y derivar</option>';
+            d = d + '<option value="20">Cancelar/Suspender</option>';
+        }
+        if (idEstado == 2) {
+            d = d + '<option value="2">Grabar solamente</option>';
+            d = d + '<option value="3">Reasignar a otra area</option>';
+            d = d + '<option value="4">Derivar al creador</option>';
+        }
+        if (idEstado == 4) {
+            d = d + '<option value="2">Grabar solamente</option>';
+            d = d + '<option value="3">Reasignar a otra area</option>';
+            if (UsuarioLogueadoId == UsuarioCreadorIncidenteId) d = d + '<option value="5">Finalizar Incidente</option>';
+            d = d + '<option value="20">Cancelar/Suspender</option>';
+        }
+        d = d + '<option value="21">Volver sin grabar</option>';
+        d = d + '</select>';
+
+        $('#Conten_Acciones').html(d);
+        $("#Acciones").change(function () {
+            var mAccion = $('#Acciones').val();
+            if (mAccion == '3') {
+                $('#Conten_AsignacionArea').show();
+            }
+            else {
+                $('#Conten_AsignacionArea').hide();
+            }
+        });
+    }
+
+    // **********************************************************************************************************************************************************
+    // * ACIONES DISPONIBLES (Grabar, cambiar de Estado, etc)
+    // **********************************************************************************************************************************************************
+    function EjecutarAccion() {
+
+        var mAccion = $('#Acciones').val();
+        GrabarIncidentesHistorial(mAccion);
+    }
+
+    function SubirArchivos() {
+        var formData = new FormData();
+        var inpFU = document.getElementById('inpFUAbmIncidentes');
+        if (inpFU.files.length) {
+            for (var i = 0; i < inpFU.files.length; i++) {
+                formData.append('file_' + i, inpFU.files[i]);
+            }
+            $.ajax({
+                type: "POST",
+                enctype: 'multipart/form-data',
+                url: "/ArchivoAdjunto/SubirArchivos",
+                data: formData,
+                processData: false,
+                contentType: false,
+                cache: false,
+                timeout: 600000,
+                success: function (res) {
+                    if (res.error) {
+                        toastr.error(res.message, { timeOut: 2000 });
+                    } else {
+                        res.lArchivosAdjuntos.forEach(aa => {
+                            lArchivosAdjuntos.push(aa);
+                        });
+                        CargarGrillaArchivosAdjuntos();
+                        var divFU = document.getElementById('divFUAbmIncidentes');
+                        divFU.innerHTML =
+                            `<input type="file"
+                                id="inpFUAbmIncidentes"
+                                onchange="SubirArchivos()"
+                                multiple class="form-control"
+                                accept="image/*, application/pdf,.csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"/>`;
+                    }
+                }
+            });
+        }
+    }
+
+    function CargarGrillaArchivosAdjuntos() {
+        var divArchivosAdjuntos = document.getElementById('divGrillaAAAbmIncidentes');
+        var table = "<table class='table'><tbody>";
+        lArchivosAdjuntos.forEach(aa => {
+            var tr = "<tr>";
+            tr += "<td><a href='/" + aa.url + aa.nombre + "' target='_blank'>" + aa.nombreOriginal + "</a></td>";
+            tr += "<td><button type='button' class='btn btn-outline-dark btn-xs' " +
+                "onclick=\"EliminarArchivoAdjunto(" + aa.archivos_AdjuntosId + ", " + aa.yaEsRelacion + ")\">" +
+                "<i class='fas fa-trash' style='color:" + (aa.yaEsRelacion ? 'red' : '') + "'></i>" +
+                "</button></td>";
+            tr += "</tr>";
+            table += tr;
+        });
+        table += "</tbody></table>";
+        divArchivosAdjuntos.innerHTML = table;
+    }
+
+    function EliminarArchivoAdjunto(id, yaEsRelacion) {
+        if (yaEsRelacion) {
+        }
+        else {
+            lArchivosAdjuntos = lArchivosAdjuntos.filter(function (aa) { return aa.archivos_AdjuntosId != id; });
+            CargarGrillaArchivosAdjuntos();
+        }
+    }
+
+    function GrabarIncidentesHistorial(id) {
+        var valid = validaDatos('IncidentesModal');
+        if (!valid.isError) {
+            var lIdsArchivosAdjuntos = [];
+            lArchivosAdjuntos.forEach(aa => {
+                if (!aa.yaEsRelacion) {
+                    lIdsArchivosAdjuntos.push(aa.archivos_AdjuntosId)
+                }
+            });
+            var oIncidente = {
+                Id: $('#ih_Id').val(),
+                IncidenteId: $('#incidente').val(),
+                Creacion_Fecha: $('#dtpFechaInicio').val(),
+                Fecha_Cierre: $('#dtpFechaCierre').val(),
+                Creacion_Descripcion: $('#ih_Creacion_Descripcion').val(),
+                ContratistasId: $('#Contratista').val(),
+                ProyectoId: $('#Proyecto').val(),
+               // ProyectoId: $('#Conten_Proyecto').val(),
+                Creacion_UsuarioId: $('#f_SolicitadoPorId').val(),
+                AgregarEmail: $('#AgregarEmail').val(),
+                IngresarEmail: $('#IngresarEmail').val(),
+                lIdsArchivosAdjuntos: lIdsArchivosAdjuntos
+            };
+            if (id == 1) {
+                oIncidente.EstadoId = 1;
+                oIncidente.sDetalleTratamiento = $('#ih_sDetalleTratamiento').val();
+                oIncidente.AreaId = $('#AreaParaAsignar').val();
+            }
+            if (id == 2) {
+                oIncidente.EstadoId = 2;
+                oIncidente.sDetalleTratamiento = $('#ih_sDetalleTratamiento').val();
+                oIncidente.AreaId = $('#AreaParaAsignar').val();
+            }
+            if (id == 3) {
+                oIncidente.EstadoId = 3;
+                oIncidente.sDetalleTratamiento = $('#ih_sDetalleTratamiento').val();
+                oIncidente.AreaId = $('#AreaParaAsignar').val();
+            }
+            if (id == 4) {
+                oIncidente.EstadoId = 4;
+                oIncidente.sDetalleTratamiento = $('#ih_sDetalleTratamiento').val();
+                oIncidente.AreaId = 0;
+            }
+            if (id == 5) {
+                oIncidente.EstadoId = 50;
+                oIncidente.sDetalleTratamiento = $('#ih_sDetalleTratamiento').val();
+                oIncidente.AreaId = 0;
+            }
+            if (id == 20) {
+                oIncidente.EstadoId = 99;
+                oIncidente.sDetalleTratamiento = $('#ih_sDetalleTratamiento').val();
+                oIncidente.AreaId = 0;
+            }
+            $.post("/Incidentes/IncidentesHistorialGraba/", oIncidente).done(
+                function (e) {
+                    if (e.isError) {
+                        toastr.error(e.data, { timeOut: 2000 });
+                    } else {
+                        toastr.success(e.data, { timeOut: 2000 });
+                        $('#IncidenteModal').modal('hide');
+                        grilla(e.data1);
+                    }
+                }
+            );
+        }
+        else {
+            toastr.error(valid.mensaje, { timeOut: 2000 });
+        }
+    }
+
+    // **********************************************************************************************************************************************************
+    // * CARGO GRILLA CON EL HISTORIAL DEL INCIDENTE
+    // **********************************************************************************************************************************************************
+    function grilla_detalle(datos) {
+        $("#GrillaKendo").html("<div id='grillaIncidentes_Historial'></div>");
+        var colGrilla = [];
+        //colGrilla.push({ field: "id", title: "Id", width: "55px", });
+        colGrilla.push({ field: "asignacion_Fecha", title: "Fecha", template: "#= kendo.toString(kendo.parseDate(asignacion_Fecha), 'dd/MM/yyyy') #", width: "110px" });
+        colGrilla.push({ field: "modificacion_Usuario", title: "Usuario", media: "(min-width: 150px)" });
+        colGrilla.push({ field: "asignacion_Area", title: "Area", media: "(min-width: 150px)" });
+        colGrilla.push({ field: "estado", title: "Estado", media: "(min-width: 150px)" });
+        colGrilla.push({ field: "detalle", title: "Detalle", media: "(min-width: 300px)" });
+        $("#conten_GrillaIncidentesHIstorial_Detalle").kendoGrid({
+            filterable: true,
+            sortable: true,
+            groupable: true,
+            reorderable: true,
+            columnMenu: true,
+            toolbar: ["excel"],
+            excel: {
+                fileName: "IncidentesHistorial_detalle.xlsx",
+
+                allPages: true,
+                filterable: true
+            },
+            dataSource: {
+                data: datos
+            },
+            columns: colGrilla,
+        });
+    }
+
+    function Checkemail() {
+        $("#IngreseEmailExtra").show();
+    }
+
+    //#endregion
+</script>

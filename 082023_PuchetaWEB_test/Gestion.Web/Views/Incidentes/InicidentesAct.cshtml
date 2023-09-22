@@ -1,0 +1,161 @@
+﻿@model Gestion.EF.ItemIncidentesHistorial
+
+<div>
+    <div class="row">
+        <div class="col-md-6">
+            <input type="hidden" asp-for="ih.Id" />
+            <div class="form-group">
+                <label asp-for="ih.ProyectoId" class="control-label"></label>
+                @Html.DropDownListFor(model =>
+                    model.ih.ProyectoId,
+                    new SelectList(Model.Proyecto, "Id", "Nombre")
+                    , new { @class = "form-control" }
+                )
+
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="form-group">
+                <label asp-for="ih.ContratistasId" class="control-label"></label>
+                @Html.DropDownListFor(model =>
+                    model.ih.ContratistasId,
+                    new SelectList(Model.Contratistas, "Id", "Nombre")
+                    , new { @class = "form-control" }
+                )
+
+            </div>
+        </div>
+
+
+
+        <div class="col-md-6">
+            <div class="form-group">
+                <label asp-for="ih.IncidenteId" class="control-label"></label>
+                @Html.DropDownListFor(model =>
+                    model.ih.IncidenteId,
+                    new SelectList(Model.Incidentes, "Id", "Nombre")
+                    , new { @class = "form-control" }
+                )
+
+            </div>
+        </div>
+        <div class="col-md-6">
+            @{
+                List<ItemSelectList> listItemsT = new List<ItemSelectList> {
+                new ItemSelectList { Value = "Abierto", Text = "Abierto" },
+                new ItemSelectList { Value = "En Analisis", Text = "En Analisis" },
+                new ItemSelectList { Value = "Cerrado", Text = "Cerrado" },
+                new ItemSelectList { Value = "Cancelado", Text = "Cancelado" },
+                new ItemSelectList { Value = "Suspendido", Text = "Suspendido" },
+            };
+            }
+            <label asp-for="ih.EstadoId" class="control-label"></label>
+            @Html.DropDownListFor(model =>
+                model.ih.EstadoId,
+                new SelectList(listItemsT, "Value", "Text")
+                , new { @class = "form-control" }
+            )
+        </div>
+    </div>
+
+
+
+    <div class="row">
+        <h4>Creación de Incidentes </h4>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4">
+            <div class="form-group">
+                <label asp-for="ih.Creacion_Descripcion" class="control-label"></label>
+                <textarea asp-for="ih.Creacion_Descripcion" class="form-control" rows="2" cols="20"></textarea>
+                <span asp-validation-for="ih.Creacion_Descripcion" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="form-group">
+                <label class="control-label">Fecha</label>
+                <input id="fechacreacion" type="date" name="partydate" class="form-control">
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="form-group">
+                <label asp-for="ih.Creacion_UsuarioId" class="control-label"></label>
+                @Html.DropDownListFor(model =>
+                    model.ih.Creacion_UsuarioId,
+                    new SelectList(Model.Usuarios, "Id", "Nombre")
+                    , new { @class = "form-control" }
+                )
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-2">
+            <div class="btn-graba" type="button" onclick="GrabarIncidentesHistorial()"><i class="fas fa-check"></i> Grabar</div>
+        </div>
+        <div class="col-md-2">
+            <div class="btn-cerrar" type="button" data-dismiss="modal"><i class="far fa-times-circle"></i> Cerrar</div>
+        </div>
+        <div class="col-md-8"></div>
+    </div>
+</div>
+<br />
+<br />
+
+<script>
+
+    //INICIO - ARMADO DE FECHA EN LOS TEXT DEL FILTRO
+    var d = new Date();
+    //console.log('d2',d2);
+
+    var month = d.getMonth() + 1;
+    var day = d.getDate();
+    var year = d.getFullYear();
+
+    if (month < 10)
+        month = '0' + month;
+    if (day < 10)
+        day = '0' + day;
+
+    var mFechaHoy = year + "-" + month + "-" + day;
+
+    var dateControl = document.querySelector('input[id="fechacreacion"]');
+    var dateControl = document.querySelector('input[id="fechasolucion"]');
+    var dateControl = document.querySelector('input[id="fechaaceptacion"]');
+    dateControl.value = mFechaHoy;
+
+    //FIN - ARMADO DE FECHA EN LOS TEXT DEL FILTRO
+
+    function GrabarIncidentesHistorial() {
+
+        var valid = validaDatos();
+        if (!valid.isError) {
+
+            var model = {
+                Id: $('#ih_Id').val(),
+                ProyectoId: $('#ih_ProyectoId').val(),
+                ContratistasId: $('#ih_ContratistasId').val(),
+                IncidenteId: $('#ih_IncidenteId').val(),
+                EstadoId: $('#ih_EstadoId').val(),
+                AreaId: $('#ih_AreaId').val(),
+                Creacion_Descripcion: $('#ih_Creacion_Descripcion').val(),
+                Creacion_Fecha: $('#fechacreacion').val(),
+                Creacion_UsuarioId: $('#ih_Creacion_UsuarioId').val(),
+            };
+
+
+            $.post("/Incidentes/IncidentesHistorialGraba", model).done(function (e) {
+
+                if (!e.isError) {
+                    toastr.success(e.data, { timeOut: 2000 });
+                } else {
+                    toastr.error(e.data, { timeOut: 2000 });
+                }
+            });
+        } else {
+            toastr.error(valid.mensaje, { timeOut: 2000 });
+        }
+    }
+</script>

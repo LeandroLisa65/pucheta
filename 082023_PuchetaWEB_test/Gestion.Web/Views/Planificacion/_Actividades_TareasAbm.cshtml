@@ -1,0 +1,89 @@
+﻿@model Gestion.EF.ItemActividades_Tareas
+
+<div class="row">
+    <div class="col-md-12 ">
+        <input type="hidden" asp-for="pt.Id" />
+        <form asp-action="_RolAbm">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="pt.Nombre" class="control-label"></label>
+                <input asp-for="pt.Nombre" class="form-control" />
+                <span asp-validation-for="pt.Nombre" class="text-danger"></span>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="form-group">
+            <label asp-for="pt.Descripción" class="control-label"></label>
+            <textarea asp-for="pt.Descripción" class="form-control" rows="2" cols="20"></textarea>
+            <span asp-validation-for="pt.Descripción" class="text-danger"></span>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="form-group">
+            <label asp-for="pt.Planificacion_ActividadesId" class="control-label"></label>
+            @Html.DropDownListFor(model =>
+                model.pt.Planificacion_ActividadesId,
+                new SelectList(Model.Planificacion_Actividades, "Id", "Nombre")
+                , new { @class = "form-control" }
+            )
+
+        </div>
+
+    </div>
+</div>
+
+
+<div class="row">
+    <div class="col-md-2">
+        <div class="btn-graba" type="button" onclick="GrabarActividades_Tareas()"><i class="fas fa-check"></i> Grabar</div>
+    </div>
+    <div class="col-md-2">
+        <div class="btn-cerrar" type="button" data-dismiss="modal"><i class="far fa-times-circle"></i> Cerrar</div>
+    </div>
+    <div class="col-md-8"></div>
+</div>
+
+<script>
+
+    function GrabarActividades_Tareas() {
+
+        var valid = validaDatos('Actividades_TareasModal');
+        if (!valid.isError) {
+
+
+            var model = {
+                Id: $('#pt_Id').val(),
+                Nombre: $('#pt_Nombre').val(),
+                Descripción: $('#pt_Descripci_n').val(),
+                Planificacion_ActividadesId: $('#pt_Planificacion_ActividadesId').val(),
+
+            };
+
+
+            $.post("/Planificacion/Actividades_TareasGraba", model).done(function (e) {
+
+                if (!e.isError) {
+                    toastr.success(e.data, { timeOut: 2000 });
+                    $('#Actividades_TareasModal').modal('hide');
+
+                } else {
+                    toastr.error(e.data, { timeOut: 2000 });
+                }
+
+            });
+
+
+        } else {
+            toastr.error(valid.mensaje, { timeOut: 2000 });
+        }
+    }
+
+
+</script>

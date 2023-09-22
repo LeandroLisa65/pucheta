@@ -1,0 +1,278 @@
+﻿
+@model Gestion.Web.Models.ItemContratistasFile
+
+<form method="POST" enctype="multipart/form-data" id="fileUploadFormPD">
+    <div class="row">
+        <input type="hidden" id="AvanceAUX" />
+        <div class="col-md-6 ">
+            Rubro : <b><span id="sRubro"></span></b> <br />
+            Actividad : <b><span id="sActividad"></span></b> <br />
+            Ubicación <b><span id="sUbicacion"></span></b><br />
+            Inicio Estimado : <b><span id="fechaIncio"></span></b> <br />
+            Fin Estimado : <b><span id="fechaFin"></span></b> <br />
+            Inicio Real: <b><span id="fecha_Creacion"></span></b><br />
+            Comentario: <b><span id="sDetalle"></span></b>
+        </div>
+
+        <div id="alert_alDia" class="col-md-6" style="display:none;">
+            <div style="width:75%; height:90%" class="small-box bg-success">
+                <div class="inner">
+                    <h2>Faltan</h2>
+                    <span id="diasDiferencia" style="font-size:3em;"></span>
+                    <h5>Dias para Finalizar la Tarea</h5>
+                </div>
+            </div>
+        </div>
+
+        <div id="alert_Vencido" class="col-md-6" style="display:none;">
+            <div style="width:60%; height:60%" class="small-box bg-danger">
+                <div style="text-align:center;" class="inner">
+                    <h4>La Tarea <br /> Se Encuentra<br /> Vencida</h4>
+                </div>
+            </div>
+        </div>
+    </div>
+    <hr />
+    <div class="row">
+        <div class="col-md-3" style="padding-top:1em">
+            U. de Medida : <b><span id="sUnidad"></span></b>
+        </div>
+        <div class="col-md-3" style="padding-top:1em">
+            Cant. Planificada : <b><span id="cantidadPPA"></span></b>
+        </div>
+        <div class="col-md-3" style="padding-top:1em">
+            Cant. Reportada : <b><span id="cantidadAcum"></span></b>
+        </div>
+        <div class="col-md-3" style="font-size:2em; color: red;">
+            Avance: <b><span id="Avance"></span>%</b>
+        </div>
+        <hr />
+        <div class="col-md-12 ">
+            <hr />
+        </div>
+     </div>
+
+
+    <div class="row" id="Conten-Calidad" style="padding:8px; background-color: aliceblue;">
+        <div class="col-md-12">
+            <h5><b>Revision Items Calidad</b></h5>
+            <hr />
+        </div>
+        @if (Model.MostarItemCalidad == true)
+        {
+            @foreach (var item in Model.lstItemCalidad)
+            {
+                <div class="col-md-12">
+                    <label style="font-size:16px">@Html.DisplayFor(m => item.DetalleCompletoTareaCalidad)</label>
+                </div>
+                <div class="col-md-3">
+                    <label class="control-label" style="text-decoration:underline">TAREA:</label><br />
+                    <label class="control-label">@item.DetalleTareaCalidad</label><br />
+                </div>
+                <div class="col-md-3">
+                    <label class="control-label" style="text-decoration:underline">VERIFICACION</label>
+                    <select id="ddl_@item.IdCalidad_Items" class="form-control" style="width:100%">
+                        <option value="0" selected>Sel. Opcion</option>
+                        <option value="S">Aprobado</option>'
+                        <option value="N">No Aprobado</option>'
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="control-label" style="text-decoration:underline">COMENTARIO:</label>
+                    <textarea rows="3" class="form-control" style="width:100%" id="txt_@item.IdCalidad_Items" maxlength="255" />
+                </div>
+                <div class="col-md-12">
+                    <hr class="linea">
+                </div>
+            }
+        }
+        else
+        {
+        <div class="col-md-12">
+            <hr class="linea">
+        </div>
+        <div class="col-md-12">
+            <label class="control-label" style="font-size:14px">Esta Actividad no posee item de calidad relacionados. Si en necesario crear un Item de Calidad para esta actividad por vor agrege su comentario a continuacion y sera enviado al Area correspondiente</label><br />
+        </div>
+        <div class="col-md-12">
+            <textarea rows="3" class="form-control" style="width:100%" id="txtComentario_CrearItem" maxlength="255" />
+        </div>
+        <div class="col-md-12">
+            <hr class="linea">
+        </div>
+        }
+    </div>
+
+    <div class="row">
+
+        <div class="col-md-6 ">
+            <input type="hidden" id="ParteDiario_ActividadesId" />
+            <input type="hidden" id="AvanceAUX" />
+            <div class="form-group">
+                <label class="control-label">Contratista</label>
+                <div id="conten-Contratistas"></div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="form-group">
+                <label asp-for="pac.Cantidad" class="control-label"></label>
+                <input id="Cantidad" value="0" class="form-control" />
+
+            </div>
+        </div>
+        <div class="col-md-12">
+            <div class="custom-file">
+                <input type="file" asp-for="ArchivosPD" multiple id="Archivos" class="form-control custom-file-input" accept="image/*, application/pdf,.csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" />
+                <label class="custom-file-label">Seleccione Archivos...</label>
+            </div>
+        </div>
+    </div>
+    <br />
+
+
+    <div class="row">
+        <div id="btn_graba" class="col-md-6" style="display:none">
+            <div class="btn-graba " type="button" onclick="GrabarParteDiario_Contratistas()"><i class="fas fa-check"></i> Grabar</div>
+        </div>
+        <div class="col-md-6">
+            <div class="btn-cerrar" type="button" data-dismiss="modal"><i class="far fa-times-circle"></i> Cerrar</div>
+        </div>
+    </div>
+
+</form>
+
+
+
+<script>
+
+    //// LIMPIEZA DE JSON
+
+    // JSON stringify serialization y limpieza
+    JSON.stringify = JSON.stringify || function (obj) {
+        var t = typeof (obj);
+        if (t != "object" || obj === null) {
+            // simple data type
+            if (t == "string") obj = '"' + obj + '"';
+            return String(obj);
+        }
+        else {
+            // recurse array or object
+            var n, v, json = [], arr = (obj && obj.constructor == Array);
+            for (n in obj) {
+                v = obj[n]; t = typeof (v);
+                if (t == "string") v = '"' + v + '"';
+                else if (t == "object" && v !== null) v = JSON.stringify(v);
+                json.push((arr ? "" : '"' + n + '":') + String(v));
+            }
+            var rawString = (arr ? "[" : "{") + String(json) + (arr ? "]" : "}");
+            return rawString;
+        }
+    };
+    function escape(key, val) {
+        if (typeof (val) != "string") return val;
+
+        var replaced = val
+        return replaced;
+    }
+
+    JSON.stringifyEscaped = function (obj) {
+        return JSON.stringify(obj, escape);
+    }
+
+
+
+    //// FIN LIMPIEzA JSON
+    var data = JSON.parse(JSON.stringifyEscaped(@Html.Raw(Json.Serialize(Model))));
+    cargaContratistas();
+
+    $('.custom-file-input').on("change", function () {
+        var fileLabel = $(this).next('.custom-file-label');
+        var files = $(this)[0].files;
+
+        if (files.length > 1) {
+            fileLabel.html(files.length + " Archivos seleccionados.");
+        } else {
+            fileLabel.html(files[0].name);
+        }
+    });
+
+    function GrabarParteDiario_Contratistas() {
+
+        var valid = validaDatos('ParteDiario_ContratistasModal');
+        if (!valid.isError) {
+            var lstItemCalidadAux = [];
+            var lstItemCalidadAux2 = "";
+            $("[id^=ddl_]").each(function (index) {
+                var idA = this.id.split("_");
+                    lstItemCalidadAux2 = lstItemCalidadAux2 + this.value + "||" + $('#txt_' + idA[1]).val() + "||" + idA[1]+ "-*"
+                    lstItemCalidadAux.push({
+                        Valor: this.value,
+                        Descripcion: $('#txt_' + idA[1]).val(),
+                        IdCalidad_Items: idA[1]
+                    });
+            });
+
+            if ($('#ContratistasId').val() != '0') {
+                var form = $('#fileUploadFormPD')[0];
+                console.log('form', form);
+                var model = new FormData(form);
+
+                model.append('ContratistasId', $('#ContratistasId').val());
+                model.append('ParteDiario_ActividadesId', $('#ParteDiario_ActividadesId').val());
+                model.append('Cantidad', $('#Cantidad').val());
+                model.append('MostarItemCalidad', data.mostarItemCalidad);
+                model.append('lstItemCalidad', lstItemCalidadAux);
+                model.append('lstItemCalidad2', lstItemCalidadAux2);
+                model.append('CrearItemCalidad', $('#txtComentario_CrearItem').val());
+                console.log("model", model);
+
+                $.ajax({
+                    type: "POST",
+                    enctype: 'multipart/form-data',
+                    url: "/ParteDiario/ParteDiario_ContratistasGraba",
+                    data: model,
+                    processData: false,
+                    contentType: false,
+                    cache: false,
+                    timeout: 600000,
+                    success: function (e) {
+                        if (!e.data.error) {
+                            toastr.success(e.data, { timeOut: 2000 });
+                            $('#ParteDiario_ContratistasModal').modal('hide');
+                            ValidaParteDiario();
+                        } else {
+                            toastr.error(e.data.message, { timeOut: 2000 });
+                        }
+                    }
+                });
+            } else {
+                toastr.error('Seleccione un Contratista', { timeOut: 2000 });
+            }
+
+        } else {
+            toastr.error(valid.mensaje, { timeOut: 2000 });
+        }
+    }
+
+    function cargaContratistas() {
+          var id = $('#NParteDiario').val();
+        $.get("@Url.Action("GetContratistas", "ParteDiario")/" + id,
+            function (data) {
+                if (!data.isError) {
+                    var d = '<select id="ContratistasId" class="form-control">';
+                    d = d + '<option value="0">Seleccione un Contratista</option>';
+
+                    for (var i = 0; i < data.data.length; i++) {
+                        d = d + '<option value="' + data.data[i].contratistaId + '">' + data.data[i].sContratistas + '</option>';
+                    }
+                    d = d + '</select>';
+
+                    $('#conten-Contratistas').html(d);
+                }
+
+            }
+          );
+    }
+
+</script>
+

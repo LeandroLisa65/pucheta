@@ -1,0 +1,95 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+
+    <title>@ViewBag.Title</title>
+
+    <link href="~/plugins/fontawesome-free/css/fontawesome.css" rel="stylesheet" />
+    <link rel="stylesheet" href="~/plugins/fontawesome-free/css/all.min.css">
+    <link rel="stylesheet" href="~/dist/css/adminlte.min.css">
+    <link rel="stylesheet" href="~/lib/bootstrap-floating-labels-master/floating-labels.css">
+    <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
+
+    <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
+    <link href="@Url.Content("~/css/site.css")" rel="stylesheet" type="text/css" />
+
+    <link href="@Url.Content("~/plugins/kendo/css/kendo.common.min.css")" rel="stylesheet" />
+    <link href="@Url.Content("~/plugins/kendo/css/kendo.bootstrap.min.css")" rel="stylesheet" />
+    <link href="~/css/Pucheta.css?1" rel="stylesheet" />
+
+    <link href="@Url.Content("~/plugins/toastr/toastr.min.css")" rel="stylesheet" />
+
+    <link href="@Url.Content("~/plugins/icheck-bootstrap/icheck-bootstrap.css")" rel="stylesheet" />
+</head>
+<body id="contenBody" class="hold-transition sidebar-mini">
+
+    <div id="load" class="loading"></div>
+    <div class="wrapper">
+
+                    @RenderBody()
+    </div>
+
+    @Html.AntiForgeryToken()
+
+    <environment include="Development">
+        <!--<script src="~/plugins/jquery/jquery.min.js"></script>
+        <script src="~/plugins/kendo/js/jquery.min.js"></script>-->
+        <script src="~/dist/js/jquery.min.js"></script>
+        <script src="~/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+
+        <script src="~/js/Uploadpicture.js" asp-append-version="true"></script>
+        <script src="~/js/Avatar.js" asp-append-version="true"></script>
+    </environment>
+    <environment exclude="Development">
+        <script src="~/dist/js/jquery.min.js"></script>
+        @*<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"
+                asp-fallback-src="~/lib/jquery/dist/jquery.min.js"
+                asp-fallback-test="window.jQuery"
+                crossorigin="anonymous"
+                integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=">
+        </script>*@
+        @*<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.bundle.min.js"
+                asp-fallback-src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"
+                asp-fallback-test="window.jQuery && window.jQuery.fn && window.jQuery.fn.modal"
+                crossorigin="anonymous"
+                integrity="sha384-xrRywqdh3PHs8keKZN+8zzc5TX0GRTLCcmivcbNJWm2rs5C8PRhcEn3czEjhAO9o">
+        </script>*@
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.bundle.min.js"
+                asp-fallback-src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"
+                asp-fallback-test="window.jQuery && window.jQuery.fn && window.jQuery.fn.modal"
+                crossorigin="anonymous">
+        </script>
+    </environment>
+
+    <script src="~/dist/js/adminlte.min.js" asp-append-version="true"></script>
+    <script src="~/plugins/kendo/js/kendo.all.min.js"></script>
+    <script src="~/plugins/kendo/js/kendo.messages.es-AR.js"></script>
+    <script src="~/plugins/kendo/js/jszip.min.js"></script>
+    <script src="~/plugins/kendo/js/pako_deflate.min.js"></script>
+    <script>
+        // Import DejaVu Sans font for embedding
+
+        // NOTE: Only required if the Kendo UI stylesheets are loaded
+        // from a different origin, e.g. cdn.kendostatic.com
+        kendo.pdf.defineFont({
+            "DejaVu Sans": "https://kendo.cdn.telerik.com/2016.2.607/styles/fonts/DejaVu/DejaVuSans.ttf",
+            "DejaVu Sans|Bold": "https://kendo.cdn.telerik.com/2016.2.607/styles/fonts/DejaVu/DejaVuSans-Bold.ttf",
+            "DejaVu Sans|Bold|Italic": "https://kendo.cdn.telerik.com/2016.2.607/styles/fonts/DejaVu/DejaVuSans-Oblique.ttf",
+            "DejaVu Sans|Italic": "https://kendo.cdn.telerik.com/2016.2.607/styles/fonts/DejaVu/DejaVuSans-Oblique.ttf",
+            "WebComponentsIcons": "https://kendo.cdn.telerik.com/2017.1.223/styles/fonts/glyphs/WebComponentsIcons.ttf"
+        });
+    </script>
+
+    <script src="~/plugins/toastr/toastr.min.js" asp-append-version="true"></script>
+    <script src="~/js/gestion.js" asp-append-version="true"></script>
+    <script src="~/js/tools.js" asp-append-version="true"></script>
+    <script src="~/lib/bootstrap-floating-labels-master/floating-labels.js"></script>
+
+    @RenderSection("Scripts", required: false)
+
+</body>
+</html>

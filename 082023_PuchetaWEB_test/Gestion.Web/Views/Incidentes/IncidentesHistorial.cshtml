@@ -1,0 +1,403 @@
+﻿
+@{
+    ViewData["Title"] = "Gestión Incidentes/Novedades";
+    Layout = "~/Views/Shared/_LayoutGestion.cshtml";
+}
+
+<div class="card">
+    <div class="card-body">
+        <nav>
+            <div class="nav nav-tabs" id="nav-tab" role="tablist">
+                <a class="nav-item nav-link active"
+                   id="tabIncidentes"
+                   data-toggle="tab"
+                   href="#divIncidentes"
+                   role="tab"
+                   aria-controls="divIncidentes"
+                   aria-selected="true">Incidentes</a>
+                <a class="nav-item nav-link"
+                   id="tabNovedades"
+                   data-toggle="tab"
+                   href="#divNovedades"
+                   role="tab"
+                   aria-controls="divNovedades"
+                   aria-selected="false">Novedades</a>
+            </div>
+        </nav>
+        <div class="tab-content" style="padding-top:1em">
+            <div id="divIncidentes" class="tab-pane fade show active">
+                <div class="row">
+                    <div class="col-md-2">
+                        <label>Desde</label>
+                        <input type="date" id="inpFiltroIncidentesFecDesde" class="form-control" />
+                    </div>
+                    <div class="col-md-2">
+                        <label>Hasta</label>
+                        <input type="date" id="inpFiltroIncidentesFecHasta" class="form-control" />
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label class="control-label">Estado:</label>
+                            <div id="Conten_Estado">
+                                <select id="ddlEstados" class="form-control" style="font-size:12px">
+                                    <option value="0" selected>Todos</option>
+                                    <option value="1">Abierto</option>
+                                    <option value="2">Tratamiento</option>
+                                    <option value="3">Validación</option>
+                                    <option value="4">Cerrado</option>
+                                    <option value="5">Cancelado</option>
+                                    <option value="6">En Ejecución</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label class="control-label">Visualización:</label>
+                            <div id="Conten_Visualizacion">
+                                <select id="ddlVisualizacion" class="form-control" style="font-size:12px">
+                                    <option value="TO" selected>Todos</option>
+                                    <option value="CA">Creados/Asignados a mi</option>
+                                    <option value="PA">Participante</option>
+                                    <option value="CR">Solo creados por mi</option>
+                                    <option value="AS">Solo asignados a mi</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label class="control-label">Situación:</label>
+                            <div id="Conten_Situacion">
+                                <select id="ddlSituacion" class="form-control" style="font-size:12px">
+                                    <option value="0" selected>Todos</option>
+                                    <option value="PC">Por Vencer</option>
+                                    <option value="VE">Vencidos</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label class="control-label">Proyecto:</label>
+                            <div id="Conten_FiltroProyecto">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label class="control-label">Área Asignada</label>
+                            <div id="Conten_FiltroAsignadaArea">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-10" style="padding-top:1.95em">
+                        <button type="button" class="btn btn-outline-secondary float-right"
+                                style="margin-left:1em"
+                                onclick="LimpiarFiltros()">
+                            <i class="fas fa-eraser"></i>
+                            Limpiar Filtros
+                        </button>
+                        <button type="button" class="btn btn-outline-dark float-right"
+                                style="margin-left:1em"
+                                onclick="cargaIncidentesHistorialGrilla()">
+                            <i class="fas fa-search"></i>
+                            Buscar
+                        </button>
+                        <button typeof="button" class="btn btn-primary float-right" onclick="Nuevo()">
+                            <i class="far fa-edit"></i>
+                            Agregar Incidente
+                        </button>
+                    </div>
+                </div>
+                <div class="row">
+                    <div id="conten_IncidentesHistorial" class="col-md-12"></div>
+                </div>
+            </div>
+            <div id="divNovedades" class="tab-pane fade show">
+                <div class="row">
+                    <div class="col-md-2">
+                        <label>Desde</label>
+                        <input type="date" id="inpFiltroNovFecDesde" class="form-control" />
+                    </div>
+                    <div class="col-md-2">
+                        <label>Hasta</label>
+                        <input type="date" id="inpFiltroNovFecHasta" class="form-control" />
+                    </div>
+                    <div class="col-md-2">
+                        <label>Tipo</label>
+                        <select id="slcFiltroNovTipos" class="form-control"></select>
+                    </div>
+                    <div class="col-md-2">
+                        <label>Proyectos</label>
+                        <select id="slcFiltroNovProyectos" class="form-control"></select>
+                    </div>
+                    <div class="col-md-2">
+                        <label>Contratista</label>
+                        <select id="slcFiltroNovContratistas" class="form-control"></select>
+                    </div>
+                    <div class="col-md-2">
+                        <label>Criticidad</label>
+                        <select id="slcFiltroNovCriticidades" class="form-control"></select>
+                    </div>
+                    <div class="col-md-12" style="padding-top:1.95em">
+                        <button type="button" class="btn btn-outline-dark float-right"
+                                onclick="cargarGrillaNovedades()">
+                            <i class="fas fa-search"></i>
+                            Buscar
+                        </button>
+                    </div>
+                    
+                </div>
+                <div class="row" style="padding-top:1em">
+                    <div id="divGrillaNovedades" class="col-md-12"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade  bd-example-modal-lg"
+     id="IncidenteModal"
+     tabindex="-1"
+     role="dialog"
+     aria-labelledby="myLargeModalLabel"
+     aria-hidden="true"
+     data-backdrop="static">
+    <div class="modal-dialog  modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header cabecera">
+                <h5 id="ModalTitulo" class="modal-title"></h5>
+                <button type="button" style="color:#ffffff" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body"></div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade bd-example-modal-lg"
+     id="divMdlArchivos"
+     tabindex="-1"
+     role="dialog"
+     aria-labelledby="myLargeModalLabel"
+     aria-hidden="true"
+     data-backdrop="static">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 id="ModalTitulo2" class="modal-title"></h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body2"></div>
+        </div>
+    </div>
+</div>
+
+@section scripts  {
+    <script>
+
+        //#region INICIALIZACIÓN
+        // JSON stringify serialization y limpieza
+        JSON.stringify = JSON.stringify || function (obj) {
+            var t = typeof (obj);
+            if (t != "object" || obj === null) {
+                // simple data type
+                if (t == "string") obj = '"' + obj + '"';
+                return String(obj);
+            }
+            else {
+                // recurse array or object
+                var n, v, json = [], arr = (obj && obj.constructor == Array);
+                for (n in obj) {
+                    v = obj[n]; t = typeof (v);
+                    if (t == "string") v = '"' + v + '"';
+                    else if (t == "object" && v !== null) v = JSON.stringify(v);
+                    json.push((arr ? "" : '"' + n + '":') + String(v));
+                }
+                var rawString = (arr ? "[" : "{") + String(json) + (arr ? "]" : "}");
+                return rawString;
+            }
+        };
+        function escape(key, val) {
+            if (typeof (val) != "string") return val;
+
+            var replaced = val
+            return replaced;
+        }
+        JSON.stringifyEscaped = function (obj) {
+            return JSON.stringify(obj, escape);
+        }
+        //// FIN LIMPIEzA JSON
+        var data2 = JSON.parse(JSON.stringifyEscaped(@Html.Raw(Json.Serialize(Model))));
+
+        cargarFiltrosFechas();
+        cargaFiltroProyecto(data2.lstProyectos);
+        cargaAreasParaAsignar(0);
+        cargarFiltrosGrillaNovedades(data2);
+
+        cargaIncidentesHistorialGrilla();
+        cargarGrillaNovedades();
+        $('#IncidenteModal').on('hidden.bs.modal', function (e) {
+            $('.modal-body').html("");
+            cargaIncidentesHistorialGrilla();
+        })
+        //#endregion
+
+        //#region FUNCIONES
+
+        function cargarFiltrosFechas() {
+            var inpFiltroIncidentesFecDesde = document.getElementById('inpFiltroIncidentesFecDesde');
+            var inpFiltroIncidentesFecHasta = document.getElementById('inpFiltroIncidentesFecHasta');
+            var inpFiltroNovFecDesde = document.getElementById('inpFiltroNovFecDesde');
+            var inpFiltroNovFecHasta = document.getElementById('inpFiltroNovFecHasta');
+            var fecActual = new Date();
+            var mes = fecActual.getMonth() + 1;
+            var fechaHasta = fecActual.getFullYear() + "-" + (mes < 10 ? ("0" + mes) : mes) + "-" + fecActual.getDate();
+            fecActual.setMonth(fecActual.getMonth() - 2);
+            mes = fecActual.getMonth() + 1;
+            var fechaDesde = fecActual.getFullYear() + "-" + (mes < 10 ? ("0" + mes) : mes) + "-" + fecActual.getDate();
+            inpFiltroIncidentesFecDesde.value = fechaDesde;
+            inpFiltroIncidentesFecHasta.value = fechaHasta;
+            inpFiltroNovFecDesde.value = fechaDesde;
+            inpFiltroNovFecHasta.value = fechaHasta;
+        }
+
+        function cargaFiltroProyecto(data) {
+                var d = '<select id="ddlFiltroProyecto" class="form-control" onchange="Filtro();" style="font-size:12px">';
+                d = d + '<option value="0">Todos</option>';
+                for (var i = 0; i < data.length; i++) {
+                    d = d + '<option value="' + data[i] + '">' + data[i] + '</option>';
+                }
+                d = d + '</select>';
+
+                $('#Conten_FiltroProyecto').html(d);
+            }
+
+        function cargaAreasParaAsignar() {
+                $.get("@Url.Action("GetAreasEmpresa", "Incidentes")",
+                    function (data) {
+                        if (!data.isError) {
+                            var d = '<select id="ddlFiltroArea" class="form-control" onchange="Filtro();" style="font-size:12px">';
+                            d = d + '<option value="0" selected>Todas</option>';
+                            for (var i = 0; i < data.data.length; i++) {
+                                d = d + '<option value="' + data.data[i].detalle + '">' + data.data[i].detalle + '</option>';
+                            }
+                            d = d + '</select>';
+                            $('#Conten_FiltroAsignadaArea').html(d);
+                        }
+                    }
+                );
+            }
+
+        function LimpiarFiltros() {
+            var oFiltro = {
+                FechaDesde: $('#inpFiltroIncidentesFecDesde').val(),
+                FechaHasta: $('#inpFiltroIncidentesFecHasta').val()
+            };
+            $.post("@Url.Action("_IncidentesHistorialGrilla","Incidentes")/", oFiltro).done(
+                function (data) {
+                    $('#conten_IncidentesHistorial').html(data);
+                    Filtro(2);
+                }
+            );
+        }
+
+        function cargaIncidentesHistorialGrilla() {
+            var oFiltro = {
+                FechaDesde: $('#inpFiltroIncidentesFecDesde').val(),
+                FechaHasta: $('#inpFiltroIncidentesFecHasta').val()
+            };
+            $.post("@Url.Action("_IncidentesHistorialGrilla","Incidentes")/", oFiltro).done(
+                function (data) {
+                    $('#conten_IncidentesHistorial').html(data);
+                    Filtro(0);
+                }
+            );
+        }
+
+        function Editar(e) {
+            var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+            var id = dataItem.id;
+            $('#ModalTitulo').html(" Detalle de Incidente");
+            $.get("@Url.Action("_IncidentesHistorialAbm","Incidentes")/" + id,
+                function (data) { $('.modal-body').html(data); })
+            $('#IncidenteModal').modal('show');
+        }
+
+        function Nuevo() {
+            $('#ModalTitulo').html(" Nuevo Incidente");
+            $.get("@Url.Action("_IncidentesHistorialAbm","Incidentes")/0",
+                function (data) { $('.modal-body').html(data); })
+            $('#IncidenteModal').modal('show');
+        }
+
+        function cargarSlcFiltroNovTipos(lTipos) {
+            var slcFiltroNovTipos = document.getElementById('slcFiltroNovTipos');
+            var options = "<option value='' selected>Todas</option>";
+            lTipos.forEach(t => {
+                options += "<option value='" + t + "'>" + t + "</option>";
+            });
+            slcFiltroNovTipos.innerHTML = options;
+        }
+
+        function cargarSlcFiltroNovProyectos(lProyectos) {
+            var slcFiltroNovProyectos = document.getElementById('slcFiltroNovProyectos');
+            var options = "<option value='' selected>Todos</option>";
+            lProyectos.forEach(c => {
+                options += "<option value='" + c + "'>" + c + "</option>";
+            });
+            slcFiltroNovProyectos.innerHTML = options;
+        }
+
+        function cargarSlcFiltroNovContratistas(lContratistas) {
+            var slcFiltroNovContratistas = document.getElementById('slcFiltroNovContratistas');
+            var options = "<option value='' selected>Todos</option>";
+            lContratistas.forEach(c => {
+                options += "<option value='" + c + "'>" + c + "</option>";
+            });
+            slcFiltroNovContratistas.innerHTML = options;
+        }
+
+        function cargarSlcFiltroNovCriticidades(lCriticidades) {
+            var slcFiltroNovCriticidades = document.getElementById('slcFiltroNovCriticidades');
+            var options = "<option value='' selected>Todas</option>";
+            lCriticidades.forEach(c => {
+                options += "<option value='" + c + "'>" + c + "</option>";
+            });
+            slcFiltroNovCriticidades.innerHTML = options;
+        }
+
+        function cargarFiltrosGrillaNovedades(data) {
+            var lTipos = data.lTipos;
+            var lProyectos = data.lstProyectos;
+            var lContratistas = data.lContratistas;
+            var lCriticidades = data.lCriticidades;
+            cargarSlcFiltroNovTipos(lTipos);
+            cargarSlcFiltroNovProyectos(lProyectos);
+            cargarSlcFiltroNovContratistas(lContratistas);
+            cargarSlcFiltroNovCriticidades(lCriticidades);
+        }
+
+        function cargarGrillaNovedades() {
+            var oFiltro = {
+                FechaDesde: $('#inpFiltroNovFecDesde').val(),
+                FechaHasta: $('#inpFiltroNovFecHasta').val()
+            };
+            $.post("@Url.Action("_NovedadesGrilla","Incidentes")/", oFiltro).done(
+                function (data) {
+                    $('#divGrillaNovedades').html(data);
+                }
+            );
+        }
+
+        //#endregion
+
+    </script>
+}
+
+
+

@@ -1,0 +1,526 @@
+﻿@model Gestion.EF.ReturnData
+
+<div class="row">
+    <div class="col-lg-12">
+        <div class="card  card-rojo">
+            <div class="card-header cabecera">
+                <h5 class="m-0"></h5>
+            </div>
+            <div class="card-body">
+            @*-----------------------------------------------------------------------------------*@
+                <div class="row">
+                    <div id="Novedades" class="col-md-12">
+                        <div class="form-group">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="control-label">Incidentes</label>
+                                        <input id="dllIncidentes" />
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="control-label">Solicitado Por</label>
+                                    <input id="txtUsuario" type="text" class="form-control" disabled>
+                                    
+                                    <span class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div  class="col-md-12">
+                        <div class="form-group">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label class="control-label">Contratista</label>
+                                        <input id="ddlContratistas" />
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label class="control-label">Fecha Cierre</label>
+                                        <input id="dtpFechaCierre" type="date" name="partydate" class="form-control">
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label class="control-label">Asignación de Área</label>
+                                        <div id="dllAreas"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <label>Comentario:</label>
+                        <textarea id="txtComentarioIncidente" class="form-control"></textarea>
+                    </div>
+                </div>
+            </div>
+
+
+                <div class="row">
+                    @*cON ESTO ESTIRAMOS TODO EL CONTORNO Q RODEA A LA CAJA <div class="col-md-12">*@
+                    <div class="form-group">
+                        <div class="row">
+                            <div id="divFUAbmIncidentes" class="col-md-12">
+                                <input type="file"
+                                       id="inpFUAbmIncidentes"
+                                       onchange="SubirArchivos()"
+                                       multiple
+                                       class="form-control"
+                                       accept="image/*, application/pdf,.csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" />
+                            </div>
+                        </div>
+                        
+                    </div>
+
+
+                    @*</DIV>*@
+                </div>
+                <div id="divGrillaAAAbmIncidentes" class="col-md-2"></div>
+                <div class="row" style="justify-content: center">
+                    <div class="col-md-2" style="">
+                        <div class="btn-graba" onclick="Grabar_Incidente()">
+                            <i class="fas fa-check"></i>
+                            Grabar
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="btn-cerrar" onclick="LimpiarABM_Incidentes()" data-dismiss="modal">
+                            <i class="far fa-times-circle"></i>
+                            Cancelar
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="form-group">
+                                <div id="Conte_grillaIncidenteHistorial"></div>
+                        </div>
+                    </div>
+                </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+<input id="NParteDiario" type="hidden" />
+
+
+
+@*USO SOLO ESTE ME PARECE*@
+<div class="modal fade  bd-example-modal-lg"
+     id="divMdlArchivos2"
+     tabindex="-1"
+     role="dialog"
+     aria-labelledby="myLargeModalLabel"
+     aria-hidden="true"
+     data-backdrop="static">
+    <div class="modal-dialog  modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header cabecera">
+                <h5 id="tituloMdlArchivos2" class="modal-title"></h5>
+                <button type="button" style="color:#FFFFFF" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="divBodyMdlArchivos2">
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+
+
+
+<script>
+ /**************************************************VERSION-NUEVA************************************************* */
+    var dataGlobal;
+    var data = JSON.parse('@Html.Raw(Json.Serialize(Model))');
+
+
+    var IdProyecto=data.data;
+    var ParteDiarioId = data.data1;
+
+
+       var d = new Date();
+
+    var month = d.getMonth() + 1;
+    var day = d.getDate();
+    var year = d.getFullYear();
+    var day2 = d.getDate() + 5;
+
+    if (month < 10)
+        month = '0' + month;
+    if (day < 10)
+        day = '0' + day;
+    if (day2 < 10)
+        day2 = '0' + day2;
+
+    var mFechaHoy = year + "-" + month + "-" + day;
+    var mFechaFuturo = year + "-" + month + "-" + day2;
+   var dateControl = document.querySelector('input[id="dtpFechaCierre"]');
+    dateControl.value = mFechaFuturo;
+
+   
+
+
+
+   /*CARGADORES DE COMBOS*/
+    cargaIncidentes();
+    cargaContratistas();
+    cargarUsuario();
+    cargaAreas();
+    GetDatosGrillaIncidentesHistorial();
+
+
+    function cargaIncidentes() {
+        $.get("@Url.Action("GetIncidente", "ParteDiario2")",    
+            function (data2) {
+                if (!data2.isError) {
+                            $("#dllIncidentes").kendoDropDownList({
+                                filter: "startswith",
+                                dataTextField: "nombre",
+                                dataValueField: "id",
+                                optionLabel: "Elegir Incidentes",
+
+                                dataSource: data2.data,
+                                height: 400
+                            });
+                            /// 
+                            
+
+                }
+
+            }
+        );
+    }
+
+    function cargaContratistas() {
+        $.get("@Url.Action("GetContratistas", "ParteDiario2")/" + IdProyecto,
+            function (data) {
+
+                if (!data.isError) {
+                    $("#ddlContratistas").kendoDropDownList({
+                        filter: "startswith",
+                        dataTextField: "sContratistas",
+                        dataValueField: "contratistaId",
+                        optionLabel: "Elegir Contratista",
+                        dataSource: data.data,
+                        height: 400
+                    });
+
+                }
+
+            }
+        );
+    }
+
+    function cargarUsuario() {
+        $.get("@Url.Action("CargarUsuario", "ParteDiario2")/" ,
+            function (data) {
+                if (!data.isError) {
+                    $("#txtUsuario").val(data.data);
+
+                }
+
+            }
+        );
+    }
+
+     function cargaAreas() {
+            $.get("@Url.Action("GetAreasEmpresa", "ParteDiario2")/" + IdProyecto,
+                function (data) {
+
+                    if (!data.isError) {
+                        $("#dllAreas").kendoDropDownList({
+                            filter: "startswith",
+                            dataTextField: "detalle",
+                            dataValueField: "id",
+                            optionLabel: "Elegir Area",
+
+                            dataSource: data,
+                            height: 400
+                        });
+
+                    }
+
+                }
+            );
+        }
+
+    /*-------- */
+
+
+    /* ARCHIVOS */
+
+    var lArchivosAdjuntos = [];
+    function SubirArchivos() {
+        var formData = new FormData();
+        var idInpFU = 'inpFUAbmIncidentes';
+        var idDivFU = 'divFUAbmIncidentes';
+        var idDivGrillaAAAbm = 'divGrillaAAAbmIncidentes';
+
+        var inpFU = document.getElementById(idInpFU);
+        console.log('-->',inpFU)
+        if (inpFU.files.length) {
+            for (var i = 0; i < inpFU.files.length; i++) {
+                formData.append('file_' + i, inpFU.files[i]);
+            }
+            $.ajax({
+                type: "POST",
+                enctype: 'multipart/form-data',
+                url: "/ArchivoAdjunto/SubirArchivos",
+                data: formData,
+                processData: false,
+                contentType: false,
+                cache: false,
+                timeout: 600000,
+                success: function (res) {
+                    if (res.error) {
+                        toastr.error(res.message, { timeOut: 2000 });
+                    } else {
+                        res.lArchivosAdjuntos.forEach(aa => {
+                            lArchivosAdjuntos.push(aa);
+                        });
+                       
+                        CargarGrillaArchivosAdjuntos(idDivGrillaAAAbm);
+                        var divFU = document.getElementById(idDivFU);
+                        divFU.innerHTML =
+                            `<input type="file"
+                                        id="`+ idInpFU + `"
+                                        onchange="SubirArchivos()"
+                                        multiple class="form-control"
+                                        accept="image/*, application/pdf,.csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"/>`;
+                    }
+                }
+            });
+        }
+    }
+
+    function CargarGrillaArchivosAdjuntos(idDivGrilla) {
+        var divArchivosAdjuntos = document.getElementById(idDivGrilla);
+        var table = "<table class='table'><tbody>";
+        lArchivosAdjuntos.forEach(aa => {
+            var tr = "<tr>";
+            tr += "<td><a href='/" + aa.url + aa.nombre + "' target='_blank'>" + aa.nombreOriginal + "</a></td>";
+            tr += "<td><button type='button' class='btn btn-secondary btn-xs' " +
+                "onclick=\"EliminarArchivoAdjunto('" + idDivGrilla + "', " + aa.archivos_AdjuntosId + ")\">" +
+                "<i class='fas fa-trash'></i>" +
+                "</button></td>";
+            tr += "</tr>";
+            table += tr;
+        });
+        table += "</tbody></table>";
+        divArchivosAdjuntos.innerHTML = table;
+
+    }
+
+    function EliminarArchivoAdjunto(idDivGrilla, id) {
+        lArchivosAdjuntos = lArchivosAdjuntos.filter(function (aa) { return aa.archivos_AdjuntosId != id; });
+        CargarGrillaArchivosAdjuntos(idDivGrilla);
+    }
+
+    /*------- */
+
+
+    /*CARGAR INCIDENTES */
+    function Grabar_Incidente() {
+        var SolicitadoPor = $('#txtUsuario').val();
+        var selectedValueContratista = $('#ddlContratistas').val();
+        var Incidente = $('#dllIncidentes').val();
+        var Fecha = $('#dtpFechaCierre').val();
+        var AreaId = $('#dllAreas').val();
+
+        var mRegOK = true;
+
+        if (Incidente == "0") {
+            toastr.error("Debe seleccionar un Incidente", { timeOut: 2000 });
+            mRegOK = false;
+        }
+        if (AreaId == "0") {
+            toastr.error("Debe seleccionar una Area", { timeOut: 2000 });
+            mRegOK = false;
+        }
+        if (selectedValueContratista == "0") {
+            toastr.error("Debe seleccionar un Contratista", { timeOut: 2000 });
+            mRegOK = false;
+        }
+        /*if (Fecha == "0") {
+            toastr.error("Debe seleccionar un Contratista", { timeOut: 2000 });
+            mRegOK = false;
+        }*/
+       
+
+        if (mRegOK == true) {
+            var lIdsArchivosAdjuntos = [];
+            lArchivosAdjuntos.forEach(aa => lIdsArchivosAdjuntos.push(aa.archivos_AdjuntosId));
+            var oIncidente = {
+                ParteDiarioId: ParteDiarioId,
+                ProyectoId:IdProyecto,
+                IncidenteId: $('#dllIncidentes').val(),
+                ComentarioHI :$('#txtComentarioIncidente').val(),
+                SolicitadoPor: $('#txtUsuario').val(),
+                ContratistaId:selectedValueContratista,
+                FechaCierre: $('#dtpFechaCierre').val(),
+                AreaId: $('#dllAreas').val(),
+                lIdsArchivosAdjuntos: lIdsArchivosAdjuntos
+            };
+           $.post("/ParteDiario2/ParteDiarioGrabaIncidentes/", oIncidente).done(
+                function (e) {
+                    if (e.isError) {
+                        toastr.error(e.data, { timeOut: 2000 });
+                    } else {
+                        toastr.success(e.data, { timeOut: 2000 });
+                       LimpiarABM_Incidentes();
+                        grillaIncidentesHistorial(e.data1);
+                        
+                    }
+                }
+            );
+        }
+    }
+    /*------------ */
+
+       /*LIMPIARDORES */
+    function LimpiarABM_Incidentes() {
+
+
+        $('#divGrillaAAAbmNovedades').html('');
+        $("#ddlContratistas").data('kendoDropDownList').value("0");
+        $("#dllIncidentes").data('kendoDropDownList').value("0");
+        $("#dllAreas").data('kendoDropDownList').value("0");
+        $("#dtpFechaCierre").val('');
+        
+        $("#txtComentarioIncidente").val('');
+
+        lArchivosAdjuntos = [];
+        CargarGrillaArchivosAdjuntos('divGrillaAAAbmIncidentes');
+        //$("#dtpFechaCierre").kendo.toString(new Date(), "dd/MMMM/yyyy"); //"d")
+    }
+
+
+
+   /*-------------- */
+
+    /* Cargar Grilla*/
+    function grillaIncidentesHistorial(data) {
+        if ($('#id_Proyecto').val() > 0) {
+            $('#tituloInciditendes').html('<b>Incidentes</b> ');
+            $("#Conte_grillaIncidenteHistorial").html("<div id='grillaIncidentesHistorial'></div>");
+            var colGrilla = [];
+            colGrilla.push({ field: "id", title: "Id", media: "(min-width: 450px)", hidden: true });
+            colGrilla.push({ field: "sIncidente", title: "Incidente", media: "(min-width: 450px)" });
+            colGrilla.push({ field: "comentario", title: "Comentario", media: "(min-width: 450px)" });
+            colGrilla.push({ field: "sUsuarioDueño", title: "Solicitado Por", media: "(min-width: 450px)" });
+            //colGrilla.push({ command: { text: "Archivos", click: verArchivos_Incidentes }, title: "Archivos", width: "165px", attributes: { style: "text-align:center;" } });
+            $("#grillaIncidentesHistorial").kendoGrid({
+                filterable: true,
+                sortable: true,
+                groupable: true,
+                reorderable: true,
+                pageable: {
+                    refresh: true,
+                    pageSizes: true,
+                    buttonCount: 20,
+                },
+                pageSize: 30,
+                columnMenu: true,
+                toolbar: ["excel"],
+                excel: {
+                    fileName: "ParteDiarioIncidentes.xlsx",
+                    allPages: true,
+                    filterable: true
+                },
+                dataSource: {
+                    data: data
+                },
+                columns: colGrilla,
+            });
+        } else {
+            $("#Conte_grillaIncidenteHistorial").html("<div id='grillaIncidentesHistorial'></div>");
+            var colGrilla = [];
+            colGrilla.push({ field: "id", title: "Id", media: "(min-width: 450px)", hidden: true });
+            colGrilla.push({ field: "sIncidente", title: "Incidente", media: "(min-width: 450px)" });
+            colGrilla.push({ field: "creacion_Descripcion", title: "Comentario", media: "(min-width: 450px)" });
+            colGrilla.push({ field: "sUsuarioDueño", title: "Solicitado Por", media: "(min-width: 450px)" });
+            colGrilla.push({ field: "sContratista", title: "Contratista", media: "(min-width: 450px)" });
+            //colGrilla.push({ field: "fecha_Cierre", title: "F. Cierre", template: "#= kendo.toString(kendo.parseDate(fecha_Cierre), 'dd/MM/yyyy') #", width: "90px" });
+            colGrilla.push({ command: { text: "Archivos", click: verArchivos_Incidentes }, title: "ArchivosInh", width: "165px", attributes: { style: "text-align:center;" } });
+            $("#grillaIncidentesHistorial").kendoGrid({
+                filterable: true,
+                sortable: true,
+                groupable: true,
+                pageSize: 30,
+                pageable: {
+                    refresh: true,
+                    pageSizes: true,
+                    buttonCount: 20,
+                },
+                reorderable: true,
+                columnMenu: true,
+                toolbar: ["excel"],
+                excel: {
+                    fileName: "ParteDiarioIncidenteshistorial.xlsx",
+                    allPages: true,
+                    filterable: true
+                },
+                dataSource: {
+                    data: data
+                },
+                columns: colGrilla,
+                dataBound: function () {
+                    dataView = this.dataSource.view();
+                    for (var i = 0; i < dataView.length; i++) {
+                        if (dataView[i].isArchivosIncidentes) {
+                            var uid = dataView[i].uid;
+                            $("#grillaIncidentesHistorial tbody").find("tr[data-uid=" + uid + "]").find(".k-grid-ArchivosInh").hide();
+                        }
+                    }
+                }
+            });
+        }
+    }
+    
+
+    function GetDatosGrillaIncidentesHistorial() {
+
+        
+        $.get("/ParteDiario2/ParteDiarioIncidentesHistorialGet/" + ParteDiarioId).done(function (e) {
+
+            if (!e.isError) {
+                grillaIncidentesHistorial(e.data);
+                
+            } else {
+                toastr.error(e.data, { timeOut: 2000 });
+            }
+        });
+    }
+
+
+    async function VerArchivo() {
+        await setTimeout(console.log(''), 2000);
+    }
+
+    async function verArchivos_Incidentes(e) {
+        await VerArchivo();
+        var oIncidente = this.dataItem($(e.currentTarget).closest("tr"));
+        var id = oIncidente.id;
+        $('#tituloMdlArchivos2').html("Archivos Incidentes");
+        $.get("@Url.Action("_GetArchivos_ParteDiarioIncidentes", "ParteDiario2")/" + id,
+            function (data) {
+                $('.divBodyMdlArchivos2').html(data);
+            });
+        $('#divMdlArchivos2').modal('show');
+    }
+
+</script>

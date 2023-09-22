@@ -1,0 +1,93 @@
+﻿@model Gestion.EF.ItemContratista
+
+<div class="row">
+    <div class="col-md-12">
+        <input type="hidden" asp-for="pc.Id" />
+        <div class="form-group">
+            <label asp-for="pc.ParteDiarioId" class="control-label"></label>
+            @Html.DropDownListFor(model =>
+                model.pc.ParteDiarioId,
+                new SelectList(Model.ParteDiario, "Id", "Asig_Contratista")
+                , new { @class = "form-control" }
+            )
+
+        </div>
+
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="form-group">
+            <label asp-for="pc.UsuariosId" class="control-label"></label>
+            @Html.DropDownListFor(model =>
+                model.pc.UsuariosId,
+                new SelectList(Model.Usuarios, "Id", "Nombre")
+                , new { @class = "form-control" }
+            )
+
+        </div>
+
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="form-group">
+            <label asp-for="pc.Comentario" class="control-label"></label>
+            <input asp-for="pc.Comentario" type="number" class="form-control">
+            <span asp-validation-for="pc.Comentario" class="text-danger"></span>
+        </div>
+    </div>
+
+</div>
+
+
+
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="form-group">
+            <button type="button" class="btn btn-primary" onclick="GrabarContratista()"> Grabar </button>
+            <button type="button" class="btn btn-secondary" data-dismiss="modal"> Cerrar </button>
+        </div>
+    </div>
+</div>
+
+<script>
+
+    function GrabarContratista() {
+
+        var valid = validaDatos('ContratistaModal');
+        if (!valid.isError) {
+
+
+
+            var model = {
+                Id: $('#pc_Id').val(),
+                ParteDiarioId: $('#pc_ParteDiarioId').val(),
+                UsuariosId: $('#pc_UsuariosId').val(),
+                Comentario: $('#pc_Comentario').val(),
+            };
+
+
+            $.post("/ParteDiario/ContratistaGraba", model).done(function (e) {
+
+                if (!e.isError) {
+                    toastr.success(e.data, { timeOut: 2000 });
+                    $('#ContratistaModal').modal('hide');
+
+                } else {
+                    toastr.error(e.data, { timeOut: 2000 });
+                }
+
+            });
+
+
+        } else {
+            toastr.error(valid.mensaje, { timeOut: 2000 });
+        }
+    }
+
+
+</script>

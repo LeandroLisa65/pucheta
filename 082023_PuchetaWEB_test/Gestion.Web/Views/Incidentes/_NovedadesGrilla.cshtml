@@ -1,0 +1,140 @@
+﻿@model object
+
+<div id="divKendoNovedades"></div>
+
+<script>
+
+    //#region INICIALIZACIÓN
+
+    //#region LIMPIEZA DE JSON
+    JSON.stringify = JSON.stringify || function (obj) {
+        var t = typeof (obj);
+        if (t != "object" || obj === null) {
+            // simple data type
+            if (t == "string") obj = '"' + obj + '"';
+            return String(obj);
+        }
+        else {
+            // recurse array or object
+            var n, v, json = [], arr = (obj && obj.constructor == Array);
+            for (n in obj) {
+                v = obj[n]; t = typeof (v);
+                if (t == "string") v = '"' + v + '"';
+                else if (t == "object" && v !== null) v = JSON.stringify(v);
+                json.push((arr ? "" : '"' + n + '":') + String(v));
+            }
+            var rawString = (arr ? "[" : "{") + String(json) + (arr ? "]" : "}");
+            return rawString;
+        }
+    };
+    function escape(key, val) {
+        if (typeof (val) != "string") return val;
+
+        var replaced = val
+        return replaced;
+    }
+    JSON.stringifyEscaped = function (obj) {
+        return JSON.stringify(obj, escape);
+    }
+    //#endregion
+
+
+    var data = JSON.parse(JSON.stringifyEscaped(@Html.Raw(Json.Serialize(Model))));
+    var lNovedades = data.lNovedades;
+    var lNovedadesFiltradas = data.lNovedades;
+    $("#slcFiltroNovTipos").change(function () {
+        cargarKendoGridNovedades();
+    });
+    $("#slcFiltroNovProyectos").change(function () {
+        cargarKendoGridNovedades();
+    });
+    $("#slcFiltroNovContratistas").change(function () {
+        cargarKendoGridNovedades();
+    });
+    $("#slcFiltroNovCriticidades").change(function () {
+        cargarKendoGridNovedades();
+    });
+    cargarKendoGridNovedades();
+
+    //#endregion
+
+    //#region FUNCIONES
+
+    function filtrarListaNovedades() {
+
+        var tipoElegido = document.getElementById('slcFiltroNovTipos').value;
+        lNovedadesFiltradas = lNovedades.filter(function (n) {
+            if (tipoElegido)
+                return n.nombreTipo == tipoElegido;
+            else return true;
+        });
+
+        var proyectoElegido = document.getElementById('slcFiltroNovProyectos').value;
+        lNovedadesFiltradas = lNovedadesFiltradas.filter(function (n) {
+            if (proyectoElegido)
+                return n.nombreProyecto == proyectoElegido;
+            else return true;
+        });
+
+        var contratistaElegido = document.getElementById('slcFiltroNovContratistas').value;
+        lNovedadesFiltradas = lNovedadesFiltradas.filter(function (n) {
+            if (contratistaElegido)
+                return n.nombreContratista == contratistaElegido;
+            else return true;
+        });
+
+        var criticidadElegida = document.getElementById('slcFiltroNovCriticidades').value;
+        lNovedadesFiltradas = lNovedadesFiltradas.filter(function (n) {
+            if (criticidadElegida)
+                return n.criticidad == criticidadElegida;
+            else return true;
+        });
+    }
+
+    function cargarKendoGridNovedades() {
+        filtrarListaNovedades();
+        $("#divKendoNovedades").html("<div id='divKendoNovedades_Contenido'></div>");
+        var columnas = [];
+        columnas.push({ field: "id", title: "Id", width: "55px", });
+        columnas.push({ field: "nombreProyecto", title: "Proyecto", media: "(min-width: 120px)" });
+        columnas.push({ field: "fechaParteDiario", title: "Fecha P.D.", media: "(min-width: 120px)" });
+        columnas.push({ field: "nombreTipo", title: "Tipo", media: "(min-width: 120px)" });
+        columnas.push({ field: "solicitadoPor", title: "Solicitado por", media: "(min-width: 120px)" });
+        columnas.push({ field: "nombreContratista", title: "Contratista", media: "(min-width: 120px)" });
+        columnas.push({ field: "criticidad", title: "Criticidad", media: "(min-width: 120px)" });
+        columnas.push({ title: "Comentario", width: "70px", template: '# if (comentario) {#<button type="button" class="btn btn-primary" data-toggle="tooltip" data-placement="top" title="#=comentario#"><i class="fa fa-info-circle" aria-hidden="true"></i></button>#} else {##}#', });
+        columnas.push({ command: { name: "Archivos", text: "Archivos", click: verArchivosNovedad }, title: "Archivos", width: "65px", attributes: { style: "text-align:center;" } });
+        $("#divKendoNovedades_Contenido").kendoGrid({
+            filterable: true,
+            sortable: true,
+            groupable: true,
+            reorderable: true,
+            columnMenu: true,
+            toolbar: ["excel"],
+            excel: {
+                fileName: "Novedades.xlsx",
+                allPages: true,
+                filterable: true
+            },
+            dataSource: {
+                data: lNovedadesFiltradas
+            },
+            columns: columnas,
+            dataBound: function () {
+            }
+
+        });
+    }
+
+    var idNovedad = 0;
+    function verArchivosNovedad(e) {
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+        var idNovedad = dataItem.id;
+        $('#ModalTitulo2').html("Archivos de Novedad Id:" + idNovedad);
+        $.get("@Url.Action("_NovedadesArchivos", "Incidentes")/" + idNovedad,
+            function (data) { $('.modal-body2').html(data); console.log(data)});
+        $('#divMdlArchivos').modal('show');
+    }
+    //#endregion
+
+</script>

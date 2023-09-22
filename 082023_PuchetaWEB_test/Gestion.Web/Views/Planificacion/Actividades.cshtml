@@ -1,0 +1,84 @@
+﻿
+@{
+    ViewData["Title"] = "Actividades";
+    Layout = "~/Views/Shared/_LayoutGestion.cshtml";
+}
+
+<div class="row">
+    <div class="col-lg-12">
+        <div class="card  card-rojo">
+            <div class="card-header cabecera ">
+                <h5 class="m-0">Gestión de Actividades</h5>
+            </div>
+            <div id="conten_ActividadesGrilla" class="card-body">
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade  bd-example-modal-lg"
+     id="ActividadesModal"
+     tabindex="-1"
+     role="dialog"
+     aria-labelledby="myLargeModalLabel"
+     aria-hidden="true"
+     data-backdrop="static">
+    <div class="modal-dialog  modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header cabecera">
+                <h5 id="ModalTitulo" class="modal-title"></h5>
+                <button type="button" style="color:#FFFFFF" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+@section scripts  {
+
+    <script>
+
+        cargaActividadesGrilla();
+
+        function cargaActividadesGrilla() {
+            var urlAction = '@Url.Action("_ActividadesGrilla","Planificacion")';
+            $("#conten_ActividadesGrilla").load(urlAction);
+        }
+
+        function Editar(e) {
+
+            var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+            var id = dataItem.id;
+
+            $('#ModalTitulo').html(" Editar Actividad");
+                $.get("@Url.Action("_ActividadesAbm","Planificacion")/" + id,
+                    function (data) { $('.modal-body').html(data); })
+                $('#ActividadesModal').modal('show');
+            }
+
+        function Nuevo() {
+            $('#ModalTitulo').html(" Agregar Actividad");
+            $.get("@Url.Action("_ActividadesAbm","Planificacion")/0",
+                function (data) { $('.modal-body').html(data); })
+            $('#ActividadesModal').modal('show');
+        }
+
+        $('#ActividadesModal').on('hidden.bs.modal', function (e) {
+            $('.modal-body').html("");
+            cargaActividadesGrilla();
+        })
+
+
+
+    </script>
+
+}
+

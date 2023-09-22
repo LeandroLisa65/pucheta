@@ -1,0 +1,213 @@
+﻿<link href="~/plugins/kendoui_2022_2_802/styles/kendo.bootstrap.min.css" rel="stylesheet" />
+
+<div class="form-group" style="width:100%;">
+
+    <div class="card ">
+       
+                 <header style="text-align:center;background-color:#3b4394;color:white;padding-top:3px">
+                        <h4 style="justify-content: center;font-weight: bold;">CERTIFICADOS</h4>
+                </header>
+                <div class="row" style="padding-left:8px;">
+                    <div class="col-md-2" style="padding-top:2.3%; padding-left:2%">
+                        <div style="text-align:center" class="btn-volver" type="button" onclick="Volver()"><i class="fas fa-arrow-left"></i> Volver</div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label>Proyecto:</label>
+                            <input id="cer_EncProyecto" class="form-control" style="text-align:center;font-weight: bold;" />
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label>Contratista:</label>
+                             <input id="cer_EncContratista" class="form-control" style="text-align:center;font-weight: bold;" />
+                        </div>
+                    </div>
+                    <div class="col-md-3">             
+                            <label>Certificado Nro:</label>
+                            <input id="cer_EncNroCertificado" class="form-control" style="text-align:center;font-weight: bold;" />
+                    </div>
+                    <div class="col-md-2" style="width:20px">
+                            <label>Fecha Creacion:</label>
+                            <input id="cer_EncFechaCreacion" class="form-control" style="text-align:center; font-weight: bold;" />
+                        
+                    </div>       
+                </div>
+      
+                    <div class="row">
+                            <div class="col-lg-12">
+                                <div class="card-body">
+                                    <nav>
+                                        <div class="nav nav-tabs" id="nav-tabAct" role="tablist">
+                                            <a class="nav-item nav-link active" id="nav-gri1-tab" data-toggle="tab" href="#nav-gri1" role="tab" aria-controls="nav-gri1" aria-selected="true">Actividades</a>
+                                            <a class="nav-item nav-link " id="nav-gri2-tab" data-toggle="tab" href="#nav-gri2" role="tab" aria-controls="nav-gri2" aria-selected="false">Adicionales</a>
+                                            <a class="nav-item nav-link " id="nav-gri3-tab" data-toggle="tab" href="#nav-gri3" role="tab" aria-controls="nav-gri3" aria-selected="false">Liquidacion</a>
+                                        </div>
+                                    </nav>
+                                    <div class="tab-content" id="nav-tabContent">
+                                        <div class="tab-pane fade  show active" id="nav-gri1">
+                                            <div class="row">
+                                                <div class="col-md-12">
+                                                    <div id="Contenido_grillaActividades"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="tab-pane fade" id="nav-gri2">
+                                            <div class="row">
+                                                <div class="col-md-12">
+                                                    <div id="conten_grillaAdicionales"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="tab-pane fade" id="nav-gri3">
+                                            <div class="row">
+                                                <div class="col-md-12">
+                                                    <div id="conten_grillaLiquidacion"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                     </div>
+                     <br />
+                     <br />
+                     <div class="row">
+                        
+                     </div>
+    </div>
+
+
+
+</div>
+<style>
+    /* Centrar el botón */
+    .btn-volver {
+        display: block;
+        margin: 0 auto;
+        text-align: center;
+    }
+
+    /* Centrar los campos de entrada */
+    .form-control {
+        text-align: center;
+        font-weight: bold;
+    }
+</style>
+
+    <script>
+        const dataGlobal = JSON.parse('@Html.Raw(Json.Serialize(Model))');
+        var ModoLecturaGeneral= dataGlobal.data2;
+        var HabilitarBotonPDFLiquidacion = false;
+        
+        //--Inicializacion de Encabezado--//
+        $('#cer_EncProyecto').attr('disabled', true);
+        $('#cer_EncContratista').attr('disabled', true);
+        $('#cer_EncNroCertificado').attr('disabled', true);
+        $('#cer_EncFechaCreacion').attr('disabled', true);
+        $('#cerEncEstado').attr('disabled', true);
+        //---//
+
+        //Inicializacion de Pestanas
+        cargoActividades();
+        cargarPestanaLiquidacionABM();
+   
+
+        //---//
+
+        //------------------------------DEFINCIONES GENERALES---------------------------------------------//
+        if (dataGlobal.data != null) {
+
+            $('#cer_EncProyecto').val(dataGlobal.data.sProyecto);
+            $('#cer_EncContratista').val(dataGlobal.data.sContratista);
+            $('#cer_EncNroCertificado').val(dataGlobal.data.nroCertificado);
+            $('#cer_EncFechaCreacion').val((dataGlobal.data3));
+            $('#cerEncEstado').val(dataGlobal.data.nroCertificado);
+        }
+
+    function Volver() {
+        window.location.replace("/Certificados");
+    }
+        //-----------------------------------PESTANAS-------------------------------------------------//
+        
+        //NOTA: La variable VALOR es utilizada en la pantalla CertificadosActividadesOperaciones
+
+        function cargoActividades(valor=0) {
+            var Modo='';
+
+            if(valor==0){
+                valor=dataGlobal.data.id;
+                Modo= dataGlobal.data2;
+            }else{
+                Modo = 'Editar';
+            }
+
+            $.post("@Url.Action("_CertificadosActividadesOperaciones","Certificados")?IdCertificado=" + valor + "&Modo=" +Modo,
+                function (data) {
+                    $('#Contenido_grillaActividades').html(data);
+                })
+        }
+
+        function cargarPestanaAdicionales(valor = 0) {
+            var Modo = '';
+
+            if (valor == 0) {
+                valor = dataGlobal.data.id;
+                Modo = dataGlobal.data2;
+            } else {
+                Modo = 'Editar';
+                
+            }
+
+            $.post("@Url.Action("_CertificadosAdicionales_Pestana","Certificados")?IdCertificado=" + valor + "&Modo=" + Modo,
+                function (data) {
+                    $('#conten_grillaAdicionales').html(data);
+                })
+        }
+        function cargarPestanaLiquidacionABM() {
+        var Modo = '';
+         Modo = dataGlobal.data2;
+   
+
+        $.post("@Url.Action("_CertificadosLiquidaciones_Pestana","Certificados")?IdCertificado=" + dataGlobal.data.id + "&Modo=" + Modo,
+            function (data) {
+                $('#conten_grillaLiquidacion').html(data);
+            })
+    }
+
+    function generarPDF() {
+        if (HabilitarBotonPDFLiquidacion) {
+            window.open("/Certificados/_GenerarPDFCertificados/?IdCertificado=" + dataGlobal.data.id);
+        }
+        else{
+            toastr.success('La generacion de PDF actualmente no se encuentra disponible.', { timeOut: 1500 });
+        }
+    }
+
+
+ 
+
+
+       //------------------------------------------------------------------------------------------------//
+
+    //#region Ejecutar Pestaña
+
+    $('#nav-tabAct a[data-toggle="tab"]').on('click', function (e) {
+
+        var activeTabHref = $(e.target).attr("href");
+
+        if (activeTabHref === "#nav-gri2") {
+
+            cargarPestanaAdicionales();
+
+        }
+        if (activeTabHref === "#nav-gri3") {
+
+            toastr.success('Recordar que si realizo alguna modificacón debe actualizar las grilla seleccionando el Boton Actualizar.', { timeOut: 1500 });
+
+        }
+    });
+
+  
+     //#endregion
+    </script>

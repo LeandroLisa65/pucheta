@@ -1,0 +1,843 @@
+﻿@model Gestion.EF.ItemUsuarios
+
+<div class="row">
+    <div class="col-md-12">
+        <div id="conten_usuarios">
+            <input type="hidden" asp-for="Usuarios.Id" />
+            <input type="hidden" asp-for="Usuarios.Avatar" />
+            <div class="row">
+                <div class="col-md-2">
+                    <div class="avatar-image-container">
+                        @if (Model.Usuarios.Id > 0)
+                        {
+                            <img src="~/dist/avatar/@Model.Usuarios.Avatar" />
+                        }
+                        else
+                        {
+                            <img src="~/dist/avatar/avatar11.png" />
+                        }
+                    </div>
+                </div>
+                <div class="col-md-10">
+
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label asp-for="Usuarios.Nombre" class="control-label"></label>
+                                <input asp-for="Usuarios.Nombre" class="form-control" />
+                                <span asp-validation-for="Usuarios.Nombre" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label asp-for="Usuarios.Apellido" class="control-label"></label>
+                                <input asp-for="Usuarios.Apellido" class="form-control" />
+                                <span asp-validation-for="Usuarios.Apellido" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label asp-for="Usuarios.NUsuario" class="control-label"></label>
+                                <input asp-for="Usuarios.NUsuario" class="form-control" />
+                                <span asp-validation-for="Usuarios.NUsuario" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label asp-for="Usuarios.Email" class="control-label"></label>
+                                <input asp-for="Usuarios.Email" class="form-control" />
+                                <span asp-validation-for="Usuarios.Email" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+
+                                @{
+                                    List<ItemSelectList> listItemsT = new List<ItemSelectList> {
+                                        new ItemSelectList { Value = "O", Text = "O - Otro" },
+                                        new ItemSelectList { Value = "J", Text = "J - Jefe de Obras" },
+                                        new ItemSelectList { Value = "E", Text = "E - Responsable de Obra" },
+                                    };
+                                }
+
+                                <label asp-for="Usuarios.Tipo" class="control-label"></label>
+                                @Html.DropDownListFor(model =>
+                                    model.Usuarios.Tipo,
+                                    new SelectList(listItemsT, "Value", "Text")
+                                    , new { @class = "form-control" }
+                                )
+
+
+                            </div>
+                        </div>
+                        <div class="col-md-3" style=" margin-top:40px;">
+                            <div class="form-group">
+                                <div class="icheck-primary d-inline">
+                                    <input type="checkbox" id="Usuarios_Activo" @(Model.Usuarios.Activo ? "checked=\"checked\"" : "")>
+                                    <label for="Usuarios_Activo">@Html.DisplayNameFor(model => model.Usuarios.Activo)</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        @if (Model.Usuarios.Id > 0)
+                        {
+                            <div class="col-md-3" style=" margin-top:30px;">
+                                <button type="button" class="btn btn-danger btn-flat" onclick="ResetClave()"> Reset Clave </button>
+                            </div>
+                            <input type="hidden" asp-for="Usuarios.Clave" />
+                        }
+                        else
+                        {
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label asp-for="Usuarios.Clave" class="control-label"></label>
+                                    <input asp-for="Usuarios.Clave" class="form-control" />
+                                    <span asp-validation-for="Usuarios.Clave" class="text-danger"></span>
+                                </div>
+                            </div>
+                        }
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        <div class="row" style="padding:8px; background-color: aliceblue;">
+            <div class="col-md-12">
+                <h5><b>Roles</b></h5>
+                <hr />
+                <div class="row">
+
+                    @foreach (var rol in Model.Roles)
+                    {
+                        <div class="col-md-6" style="margin-bottom:2px;">
+                            <div class="icheck-primary d-inline">
+                                <input type="checkbox" id="Rol_@rol.Id" @(rol.Activo ? "checked=\"checked\"" : "")>
+                                <label for="Rol_@rol.Id">@rol.Detalle</label>
+                            </div>
+                        </div>
+                    }
+
+                </div>
+            </div>
+        </div>
+        <br />
+        <div class="row">
+            <div class="col-md-12">
+                <div class="form-group">
+                    <button type="button" class="btn btn-primary" onclick="GrabarUsuarios()"> Grabar datos del Usuario </button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal"> Cerrar </button>
+                </div>
+            </div>
+        </div>
+        <br />
+        @if (Model.Usuarios.Id > 0)
+        {
+
+            <div id="conten_extras" style="padding:8px; height:270px; overflow-y:scroll;  background-color: aliceblue;">
+
+                <div class="row" style="width: 100% !important;">
+                    <div class="col-md-12">
+                        <div class="row">
+                            <div class="col">
+                                <h5><b>Dispositivos</b></h5>
+                            </div>
+                            <div class="col">
+                                <button type="button" class="btn k-grid-kadd" onclick="EditDispo()"></button>
+                            </div>
+                            <div class="col"></div>
+                        </div>
+                        <hr />
+                        <div id="grilla_Dipositivos"></div>
+                    </div>
+                </div>
+                <br />
+                <div class="row" style="width: 100% !important;">
+                    <div class="col-md-12">
+                        <div class="row">
+                            <div class="col">
+                                <h5><b>Direcciones</b></h5>
+                            </div>
+                            <div class="col">
+                                <button type="button" class="btn k-grid-kadd" onclick="EditDireccion()"></button>
+                            </div>
+                            <div class="col"></div>
+                        </div>
+                        <hr />
+                        <div id="grilla_Direcciones"></div>
+                    </div>
+
+                </div>
+                <br />
+                <br />
+            </div>
+
+
+            <div id="content_dipositivos" style="display:none; background-color: aliceblue; padding:5px;">
+                <h5><b>ABM Dispositivos</b></h5>
+                <input id="U_IdUsuarioDispositivo" type="hidden" />
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="control-label"> Tipo Dispositivo </label>
+                            <div id="TDispositivo"></div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="control-label"> Número </label>
+                            <input id="U_Numero" type="text" class="form-control" />
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label class="control-label"> IMEI </label>
+                            <input id="U_IMEI" type="text" class="form-control" />
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label class="control-label"> OS </label>
+                            <input id="U_OS" type="text" class="form-control" />
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label class="control-label"> Carrier </label>
+                            <input id="U_Empresa" type="text" class="form-control" />
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div id="conten_UImage" class="form-group" style="display:none;">
+                            <label class="control-label"> Imagen </label>
+                            <img id="U_Image" src="~/dist/img/boxed-bg.jpg" style="width:150px; height:150px;" />
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div id="conten_UFinger" class="form-group" style="display:none;">
+                            <label class="control-label"> Finger </label>
+                            <img id="U_FINGERTMP" src="~/dist/img/boxed-bg.jpg" style="width:150px; height:150px;" />
+                        </div>
+                    </div>
+                </div>
+                <div class="row" style="padding: 20px;">
+
+                    <div class="col-md-3"></div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <div class="icheck-primary d-inline">
+                                <input type="checkbox" id="U_Activo">
+                                <label for="U_Activo">Activo</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <div class="icheck-primary d-inline">
+                                <input type="checkbox" id="U_Borrado">
+                                <label for="U_Borrado">Borrado</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3"></div>
+                </div>
+
+
+
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <button type="button" class="btn btn-primary" onclick="GrabaDispositivo()"> Grabar Dispositivo </button>
+                            <button type="button" class="btn btn-secondary" onclick="ClosePanel()"> Cancelar </button>
+                        </div>
+                    </div>
+                </div>
+                <hr />
+            </div>
+
+            <div id="content_direcciones" style="display:none;  background-color: aliceblue; padding:5px;">
+                <h5><b>ABM Direcciones</b></h5>
+                <input id="D_Id" type="hidden" />
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="control-label"> Procincia </label>
+                            <div id="Provincias"></div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="control-label"> Localidad </label>
+                            <div id="Localidades"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label class="control-label"> Barrio </label>
+                            <input id="D_Barrio" type="text" class="form-control" data-val-required="El campo Barrio es requerido" />
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="control-label"> Calle </label>
+                            <input id="D_Calle" type="text" class="form-control" data-val-required="El campo Calle es requerido" />
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label class="control-label"> N° / Altura </label>
+                            <input id="D_Altura" type="text" class="form-control" data-val-required="El campo N°/Altura es requerido" />
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label class="control-label"> Piso </label>
+                            <input id="D_Piso" type="text" class="form-control" />
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label class="control-label"> Dpto. </label>
+                            <input id="D_Dpto" type="text" class="form-control" />
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label class="control-label"> CP </label>
+                            <input id="D_CP" type="text" class="form-control" data-val-required="El campo CP es requerido" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <button type="button" class="btn btn-primary" onclick="GrabaDireccion()"> Grabar Direcciones </button>
+                            <button type="button" class="btn btn-secondary" onclick="ClosePanel()"> Cancelar </button>
+                        </div>
+                    </div>
+                </div>
+                <hr />
+            </div>
+        }
+        <br />
+
+
+    </div>
+</div>
+
+
+
+<script>
+
+    function grillaDipositivos(datos) {
+
+        $("#grilla_Dipositivos").html("<div id='Dipositivos'></div>");
+
+        $("#Dipositivos").kendoGrid({
+            dataSource: {
+                data: datos
+            },
+            columns: [
+
+                { field: "nDispositivos", title: "Disp." },
+                { field: "numero", title: "Numero" },
+                { field: "imei", title: "IMEI" },
+                { title: "estado", template: '# if (activo) {#<img src="../dist/img/checkbox.png" />#} else {#<img src="../dist/img/uncheckbox.png" />#}#', width: "80px", attributes: { style: "text-align:center;" } },
+
+                { command: { name: "kedit", text:"", click: EditDispo }, title: "Editar", width: "65px", attributes: { style: "text-align:center;" } }
+
+            ]
+
+        });
+    }
+
+    function grillaDirecciones(datos) {
+
+        $("#grilla_Direcciones").html("<div id='Direcciones'></div>");
+
+        $("#Direcciones").kendoGrid({
+            dataSource: {
+                data: datos
+            },
+            columns: [
+
+                { field: "nProvincias", title: "Prov" },
+                { field: "nLocalidades", title: "Loc" },
+                { field: "calle", title: "Calle" },
+                { field: "altura", title: "Altura" },
+
+                { title: "estado", template: '# if (activo) {#<img src="../dist/img/checkbox.png" />#} else {#<img src="../dist/img/uncheckbox.png" />#}#', width: "80px", attributes: { style: "text-align:center;" } },
+
+                { command: { name: "kedit", text:"", click: EditDireccion }, title: "Editar", width: "65px", attributes: { style: "text-align:center;" } }
+
+            ]
+
+        });
+    }
+
+    var dataDis = JSON.parse('@Html.Raw(Json.Serialize(Model.Usuarios.UsuariosDispositivo))');
+    var dataDir = JSON.parse('@Html.Raw(Json.Serialize(Model.Usuarios.UsuariosDireccion))');
+    var dataProvincias = JSON.parse('@Html.Raw(Json.Serialize(Model.Provincias))');
+    var dataTipoDispositivos = JSON.parse('@Html.Raw(Json.Serialize(Model.Dispositivos))');
+
+
+    grillaDipositivos(dataDis);
+    grillaDirecciones(dataDir);
+    cargaProvincias(dataProvincias);
+    cargaTipoDispositivos(dataTipoDispositivos);
+
+    function cargaProvincias(data) {
+
+        var pro = '<select id="D_Provincias" class="form-control">';
+            pro = pro + '<option value="0">- Seleccione una Provincia -</option>';
+        for (var i = 0; i < data.length; i++) {
+            pro = pro + '<option value="'+data[i].id+'">'+data[i].provincia+'</option>';
+        }
+        pro = pro + '</select>';
+
+        $('#Provincias').html(pro);
+
+        $('#D_Provincias').change(function (evento) {
+            cargaLocalidad()
+        });
+    }
+
+    function cargaLocalidad(LocalidadesId) {
+
+        var id = $('#D_Provincias').val();
+
+        $.get("@Url.Action("getLocalidades","Gestion")/" + id,
+            function (data) {
+                if (!data.isError) {
+                    var loc = '<select id="D_Localiad" class="form-control">';
+                    loc = loc + '<option value="0">- Seleccione una Localidad -</option>';
+                    for (var i = 0; i < data.data.length; i++) {
+                        loc = loc + '<option value="' + data.data[i].id + '">' + data.data[i].localidad + '</option>';
+                    }
+                    loc = loc + '</select>';
+
+                    $('#Localidades').html(loc);
+
+                    if (LocalidadesId != undefined) {
+                        $('#D_Localiad').val(LocalidadesId);
+                    }
+                }
+
+            });
+
+
+    }
+
+    function cargaTipoDispositivos(tipos) {
+
+        var loc = '<select id="U_DispositivoId" class="form-control">';
+        loc = loc + '<option value="0">- Seleccione un Dispositivo -</option>';
+        for (var i = 0; i < tipos.length; i++) {
+            loc = loc + '<option value="' + tipos[i].id + '">' + tipos[i].detalle + '</option>';
+        }
+        loc = loc + '</select>';
+
+        $('#TDispositivo').html(loc);
+
+    }
+
+    function EditDispo(e) {
+
+        $('#conten_extras').hide(500);
+        $('#content_dipositivos').show();
+        $('#content_direcciones').hide();
+        limpiaDispositivo();
+
+        if (e != undefined) {
+            var d = this.dataItem($(e.currentTarget).closest("tr"));
+            $('#U_IdUsuarioDispositivo').val(d.id);
+            $('#U_DispositivoId').val(d.dispositivosId);
+
+            $('#U_Numero').val(d.numero);
+            $('#U_IMEI').val(d.imei);
+            $('#U_OS').val(d.os);
+            $('#U_Empresa').val(d.empresa);
+
+            if (d.imageBase64 !== "" && d.imageBase64 !== null) {
+                $("#conten_UImage").show();
+                $("#U_Image").attr("src", d.imageBase64);
+            }
+            if (d.fingertmp !== "" && d.fingertmp !== null) {
+                $("#conten_UFinger").show();
+                $("#U_FINGERTMP").attr("src", d.fingertmp);
+            }
+
+            $("#U_Activo").prop('checked', d.activo);
+            $("#U_Borrado").prop('checked', d.borrado);
+
+        }
+
+
+    }
+
+    function EditDireccion(e) {
+
+        $('#conten_extras').hide(500);
+        $('#content_dipositivos').hide();
+        $('#content_direcciones').show();
+        limpiaDicreccion();
+
+        if (e != undefined) {
+            var d = this.dataItem($(e.currentTarget).closest("tr"));
+            $('#D_Id').val(d.id);
+            $('#D_Provincias').val(d.provinciasId);
+            cargaLocalidad(d.localidadesId);
+            $('#D_Barrio').val(d.barrio);
+            $('#D_Calle').val(d.calle);
+            $('#D_Altura').val(d.altura);
+            $('#D_Piso').val(d.piso);
+            $('#D_Dpto').val(d.dpto);
+            $('#D_CP').val(d.cp);
+        }
+
+    }
+
+
+    function limpiaDispositivo() {
+
+        $('#U_IdUsuarioDispositivo').val(0);
+        $('#U_DispositivoId').val("0");
+        $('#U_DispositivoId').removeClass("is-valid");
+        $('#U_DispositivoId').removeClass("is-invalid");
+        $("#conten_UImage").hide();
+        $("#conten_UFinger").hide();
+
+        $('#U_Numero').val("");
+        $('#U_Numero').removeClass("is-valid");
+        $('#U_Numero').removeClass("is-invalid");
+
+        $('#U_IMEI').val("");
+        $('#U_IMEI').removeClass("is-valid");
+        $('#U_IMEI').removeClass("is-invalid");
+
+        $('#U_OS').val("");
+        $('#U_OS').removeClass("is-valid");
+        $('#U_OS').removeClass("is-invalid");
+
+        $('#U_Empresa').val("");
+        $('#U_Empresa').removeClass("is-valid");
+        $('#U_Empresa').removeClass("is-invalid");
+
+        $("#U_Activo").prop('checked', false);
+        $("#U_Borrado").prop('checked', false);
+
+    }
+
+    function limpiaDicreccion() {
+
+        $('#D_Id').val(0);
+        $('#D_Provincias').val("0");
+        $('#D_Provincias').removeClass("is-valid");
+        $('#D_Provincias').removeClass("is-invalid");
+
+        $('#Localidades').html("");
+
+        $('#D_Barrio').val("");
+        $('#D_Barrio').removeClass("is-valid");
+        $('#D_Barrio').removeClass("is-invalid");
+
+        $('#D_Calle').val("");
+        $('#D_Calle').removeClass("is-valid");
+        $('#D_Calle').removeClass("is-invalid");
+
+        $('#D_Altura').val("");
+        $('#D_Altura').removeClass("is-valid");
+        $('#D_Altura').removeClass("is-invalid");
+
+        $('#D_Piso').val("");
+        $('#D_Piso').removeClass("is-valid");
+        $('#D_Piso').removeClass("is-invalid");
+
+        $('#D_Dpto').val("");
+        $('#D_Dpto').removeClass("is-valid");
+        $('#D_Dpto').removeClass("is-invalid");
+
+        $('#D_CP').val("");
+        $('#D_CP').removeClass("is-valid");
+        $('#D_CP').removeClass("is-invalid");
+
+
+    }
+
+
+    function ClosePanel() {
+        $('#conten_extras').show(500);
+        $('#content_dipositivos').hide(500);
+        $('#content_direcciones').hide(500);
+    }
+
+    function GrabarUsuarios() {
+
+        var valid = validaDatos('conten_usuarios');
+        if (!valid.isError) {
+            var activo = false;
+            if ($('#Usuarios_Activo').prop('checked')) {
+                activo = true;
+            }
+
+            var borrado = false;
+
+            var roles = [];
+            $("[id^=Rol_]").each(function (index) {
+
+                if ($('#' + this.id).prop('checked')) {
+                    var idA = this.id.split("_");
+
+                    roles.push({
+                        Id: 0,
+                        UsuariosId: $('#Usuarios_Id').val(),
+                        RolesId: idA[1]
+                    });
+                }
+
+            });
+
+
+            var model = {
+                Id: $('#Usuarios_Id').val(),
+                Nombre: $('#Usuarios_Nombre').val(),
+                Apellido: $('#Usuarios_Apellido').val(),
+                NUsuario: $('#Usuarios_NUsuario').val(),
+                Email: $('#Usuarios_Email').val(),
+                Clave: $('#Usuarios_Clave').val(),
+                Avatar: $('#Usuarios_Avatar').val(),
+                Tipo: $('#Usuarios_Tipo').val(),
+                Activo: activo,
+                Borrado: borrado,
+                Roles: roles
+            };
+
+            $.post("/Gestion/UsuariosGraba", model).done(function (e) {
+
+                if (!e.isError) {
+                    toastr.success(e.data, { timeOut: 2000 });
+                    $('#RolesModal').modal('hide');
+
+                } else {
+                    toastr.error(e.data, { timeOut: 2000 });
+                }
+
+            });
+
+        } else {
+            toastr.error(valid.mensaje, { timeOut: 2000 });
+        }
+    }
+
+    function GrabaDireccion() {
+
+        var validPL = validaProLoc();
+        if (!validPL.isError) {
+
+            var valid = validaDatos('content_direcciones');
+            if (!valid.isError) {
+                var model = {
+                    Id: $('#D_Id').val(),
+                    UsuariosId: $('#Usuarios_Id').val(),
+                    ProvinciasId: $('#D_Provincias').val(),
+                    LocalidadesId: $('#D_Localiad').val(),
+                    Barrio: $('#D_Barrio').val(),
+                    Calle: $('#D_Calle').val(),
+                    Altura: $('#D_Altura').val(),
+                    Piso: $('#D_Piso').val(),
+                    Dpto: $('#D_Dpto').val(),
+                    CP: $('#D_CP').val(),
+                    Activo: true,
+                    Borrado: false
+                };
+
+                $.post("/Gestion/UsuariosDireccionGraba", model).done(function (e) {
+
+                    if (!e.isError) {
+
+                        toastr.success("La direccion se ha grabado OK.", { timeOut: 2000 });
+                        grillaDirecciones(e.data);
+                        ClosePanel();
+
+                    } else {
+                        toastr.error(e.data, { timeOut: 2000 });
+                    }
+
+                });
+
+
+            } else {
+                toastr.error(valid.mensaje, { timeOut: 2000 });
+            }
+        } else {
+                toastr.error(validPL.mensaje, { timeOut: 2000 });
+        }
+    }
+
+    function validaProLoc() {
+        var Ok = false;
+        var Mensaje = "";
+
+        if ($('#D_Provincias').val() === "0") {
+                $('#D_Provincias').removeClass("is-valid");
+                $('#D_Provincias').addClass("is-invalid");
+                Mensaje = Mensaje + "Seleccione una Provincia<br>";
+                Ok = true;
+        } else {
+                $('#D_Provincias').removeClass("is-invalid");
+                $('#D_Provincias').addClass("is-valid");
+        }
+
+        if ($('#D_Localiad').val() === "0") {
+                $('#D_Localiad').removeClass("is-valid");
+                $('#D_Localiad').addClass("is-invalid");
+                Mensaje = Mensaje + "Seleccione una Localidad<br>";
+                Ok = true;
+        } else {
+                $('#D_Localiad').removeClass("is-invalid");
+                $('#D_Localiad').addClass("is-valid");
+        }
+
+        var dReturn = {
+            isError: Ok,
+            mensaje: Mensaje
+        };
+
+        return dReturn;
+    }
+
+    function GrabaDispositivo() {
+
+        var validDis = validaDispo();
+        if (!validDis.isError) {
+
+            var activo = false;
+            if ($('#U_Activo').prop('checked')) {
+                activo = true;
+            }
+
+            var borrado = false;
+            if ($('#U_Borrado').prop('checked')) {
+                borrado = true;
+            }
+
+            var model = {
+                Id: $('#U_IdUsuarioDispositivo').val(),
+                UsuariosId: $('#Usuarios_Id').val(),
+                DispositivosId: $('#U_DispositivoId').val(),
+                Numero: $('#U_Numero').val(),
+                IMEI: $('#U_IMEI').val(),
+                OS: $('#U_OS').val(),
+                Empresa: $('#U_Empresa').val(),
+                Activo: activo,
+                Borrado: borrado
+            };
+
+            $.post("/Gestion/UsuariosDispositivoGraba", model).done(function (e) {
+
+                if (!e.isError) {
+
+                    toastr.success("El Dispositivo se ha grabado OK.", { timeOut: 2000 });
+                    grillaDipositivos(e.data);
+                    ClosePanel();
+
+                } else {
+                    toastr.error(e.data, { timeOut: 2000 });
+                }
+
+            });
+
+        } else {
+            toastr.error(validDis.mensaje, { timeOut: 2000 });
+        }
+    }
+
+
+     function validaDispo() {
+        var Ok = false;
+        var Mensaje = "";
+
+         if ($('#U_DispositivoId').val() === "0") {
+             $('#U_DispositivoId').removeClass("is-valid");
+             $('#U_DispositivoId').addClass("is-invalid");
+             Mensaje = Mensaje + "Seleccione una Tipo de Dispositivo<br>";
+             Ok = true;
+         } else {
+             $('#U_DispositivoId').removeClass("is-invalid");
+             $('#U_DispositivoId').addClass("is-valid");
+
+         }
+
+         if ($('#U_DispositivoId').val() === "1") {
+             if ($('#U_Numero').val() === "") {
+                 $('#U_Numero').removeClass("is-valid");
+                 $('#U_Numero').addClass("is-invalid");
+                 Mensaje = Mensaje + "Ingresa un numero de télefono<br>";
+                 Ok = true;
+             } else {
+                 $('#U_Numero').removeClass("is-invalid");
+                 $('#U_Numero').addClass("is-valid");
+             }
+         }
+
+        var dReturn = {
+            isError: Ok,
+            mensaje: Mensaje
+        };
+
+        return dReturn;
+    }
+
+    function ResetClave() {
+
+        toastr.info("Esta seguro de resetear la clave <br> <br> <div class='btn btn-primary'  onclick='ResetClaveOK()'> Si </div> <div class = 'btn btn-dark'> NO </div>", "Resetear Clave",
+            {
+              "closeButton": true,
+              "debug": false,
+              "newestOnTop": false,
+              "progressBar": true,
+              "positionClass": "toast-top-full-width",
+              "preventDuplicates": false,
+              "onclick": null,
+              "hideDuration": "1000",
+              "showEasing": "swing",
+              "hideEasing": "linear",
+              "showMethod": "fadeIn",
+              "hideMethod": "fadeOut"
+            });
+
+    }
+
+    function ResetClaveOK() {
+
+        var UsuariosId = $('#Usuarios_Id').val();
+
+
+        $.get("@Url.Action("UsuariosResetClave","Gestion")/" + UsuariosId,
+            function (e) {
+
+            if (!e.isError) {
+
+                toastr.success(e.data, { timeOut: 2000 });
+    
+            } else {
+                toastr.error(e.data, { timeOut: 2000 });
+            }
+
+        });
+    }
+
+</script>
+

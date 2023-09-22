@@ -1,0 +1,174 @@
+﻿
+@model Gestion.EF.ItemPUA
+@{
+    ViewData["Title"] = "Proyecto_Actividades";
+    Layout = "~/Views/Shared/_LayoutGestion.cshtml";
+}
+
+
+<div class="row">
+    <div class="col-lg-12">
+        <div class="card card-rojo">
+            <div class="card-header cabecera">
+                <h5 class="m-0">Gestión de Obra: @Model.proyecto.Nombre  </h5>
+                <input type="hidden" asp-for="proyecto.Id" />
+               
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div id="conten_ABM"></div>
+                        <hr />
+                    </div>
+                    <div class="col-md-12">
+                        <h6 class="card-title">Listado de Actividades</h6>
+                    </div>
+                    <div class="col-md-12">
+                        <div id="conten_Proyecto_ActividadesGrilla"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="divMdlDetallePadre" class="modal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Actividad Precedente</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" style="height: 25em; overflow-y:scroll">
+                <div class="row">
+                    <div style="display: flex; justify-content: center;">
+                        <div id="divSpinnerDetallePadre" class="spinner-grow" role="status">
+                            <span class="sr-only">Loading...</span>
+                        </div>
+                    </div>
+                    <div id="divDetallePadre" style="display:none" class="col-md-12"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">
+                    <i class="fa fa-arrow-left"></i>
+                    Volver
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section scripts  {
+
+    <script>
+
+        Nuevo();
+        cargaProyecto_ActividadesGrilla();
+
+        function cargaProyecto_ActividadesGrilla() {
+            var id = $("#proyecto_Id").val();
+              $.get("@Url.Action("_Proyecto_ActividadesGrilla","Planificacion")/" + id,
+                    function (data) { $('#conten_Proyecto_ActividadesGrilla').html(data); })
+        }
+
+        function Editar(e) {
+            var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+            var id = dataItem.id;  ///Es el Id de la Actividad
+            var IdProyecto = $("#proyecto_Id").val(); ///Es el Id del Proyecto
+
+            $('#ModalTitulo').html(" Editar Proyecto");
+            $.get("@Url.Action("_Proyecto_ActividadesAbm","Planificacion")/" + IdProyecto + "?IdActividad=" + id,
+                function (data) {
+                    toastr.success("Se cargo la actividad correctamente.", { timeOut: 2000 });
+                    $('#conten_ABM').html(data);
+                    CargoDetalleAsignacion_PPA(id); //Cargo el detalle de asignacion a contratistas, segun Notas de Pedido
+                });
+        }
+
+        /*Ver las Notas de Pedidos que tiene esta Asignacion*/
+        function VerNP(e) {
+            var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+            var id = dataItem.id;  ///Es el Id de la Actividad
+            CargoDetalleAsignacion_PPA(id); //Cargo el detalle de asignacion a contratistas, segun Notas de Pedido
+            $("#NotaPedidoModal").modal("show");
+        }
+
+        function verPadre(id) {
+            var divSpinnerDetallePadre = document.getElementById("divSpinnerDetallePadre");
+            divSpinnerDetallePadre.style = "display: ";
+            var divDetallePadre = document.getElementById("divDetallePadre");
+            divDetallePadre.style = "display: none";
+            if (id) {
+                $.get("/Planificacion/Get_PlanPoryAct_Padres_Id/" + id).done(function (res) {
+                    if (res.error) {
+                        toastr.error("Error", { timeOut: 2000 });
+                    }
+                    else {
+                        var lPPA_Padres = res.lPPA_Padres;
+                        $("#divMdlDetallePadre").modal("show");
+                        var divSpinnerDetallePadre = document.getElementById("divSpinnerDetallePadre");
+                        divSpinnerDetallePadre.style.display = "none";
+                        divDetallePadre.innerHTML = "";
+                        lPPA_Padres.forEach(oPPA => {
+                            var table = "<table>#content</table>";
+                            var tbody = "<tbody>#content</tbody>";
+                            var tcontent = "<tr><td><label>Ubicación:</label></td><td>" + oPPA.ubicacion + "</td></tr>";
+                            tcontent += "<tr><td><label>Rubro:</label></td><td>" + oPPA.rubro + "</td></tr>";
+                            tcontent += "<tr><td><label>Actividad:</label></td><td>" + oPPA.actividad + "</td></tr>";
+                            tcontent += "<tr><td><label>Contratista:</label></td><td>" + oPPA.contratista + "</td></tr>";
+                            tcontent += "<tr><td><label>Fec. Est. Inicio:</label></td><td>" + oPPA.fechaEstInicio + "</td></tr>";
+                            tcontent += "<tr><td><label>Fec. Est. Fin:</label></td><td>" + oPPA.fechaEstFin + "</td></tr>";
+                            tcontent += "<tr><td><label>Precedente:</label></td><td>" + (oPPA.tienePadre ?
+                                "<button type='button' onclick='verPadre(" + oPPA.id + ")' class='btn btn-secondary btn-xs'>" +
+                                "<i class='fa fa-info-circle'></i></button>" : "No") + "</td></tr>";
+                            tcontent += "<tr><td><label>Comentario:</label></td><td><p>" + oPPA.detalle + "</p></td></tr>";
+                            tbody = tbody.replace("#content", tcontent);
+                            table = table.replace("#content", tbody);
+                            divDetallePadre.innerHTML += table + "<hr/>";
+                        });
+                        divDetallePadre.style.display = "";
+                    }
+                });
+            }
+        }
+
+        function Nuevo() {
+
+            var IdProyecto = $("#proyecto_Id").val(); ///Es el Id del Proyecto
+
+            $('#ModalTitulo').html(" Agregar Proyecto");
+            $.get("@Url.Action("_Proyecto_ActividadesAbm","Planificacion")/" + IdProyecto + "?IdActividad=0",
+                function (data) { $('#conten_ABM').html(data); })
+        }
+
+        //
+        //Esta funcion se utiliza para copiar masivamente la actividad
+        //
+
+        async function VerArchivo() {
+            await setTimeout(console.log(''), 2000);
+        }
+
+        async function copiarActividad(e) {
+           
+            await VerArchivo();
+            var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+            var IdProyectoActividad = $("#proyecto_Id").val();
+
+            $('#tituloMdlArchivos2').html("Copiar Actividad Masiva");
+            $.get("@Url.Action("CopiaActividadesPlanificacion", "Planificacion")/?IdProyecto=" + IdProyectoActividad + "&IdRegistro=" + dataItem.id,
+                function (data) {
+                    $('.divBodyMdlArchivos2').html(data);
+                });
+            $('#divMdlArchivos2').modal('show');
+            
+        }
+    </script>
+
+}
+
+

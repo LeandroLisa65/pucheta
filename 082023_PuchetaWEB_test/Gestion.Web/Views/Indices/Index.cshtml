@@ -1,0 +1,78 @@
+﻿@{
+    ViewData["Title"] = "Indices de Ajustes";
+    Layout = "~/Views/Shared/_LayoutGestion.cshtml";
+}
+
+<div class="row">
+    <div class="col-lg-12">
+        <div class="card  card-rojo">
+            <div class="card-header cabecera">
+                <h5 class="m-0">Gestión de Indices de Ajuste</h5>
+            </div>
+            <div id="conten_IndicesGrilla" class="card-body">
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade  bd-example-modal-lg"
+     id="IndicesModal"
+     tabindex="-1"
+     role="dialog"
+     aria-labelledby="myLargeModalLabel"
+     aria-hidden="true"
+     data-backdrop="static">
+    <div class="modal-dialog  modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header cabecera">
+                <h5 id="ModalTitulo" class="modal-title"></h5>
+                <button type="button" style="color:#ffffff" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@section scripts  {
+
+    <script>
+
+        cargaIndicesGrilla();
+
+        function cargaIndicesGrilla() {
+            var urlAction = '@Url.Action("_IndicesGrilla","Indices")';
+            $("#conten_IndicesGrilla").load(urlAction);
+        }
+
+        function Editar(e) {
+
+            var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+            var id = dataItem.id;
+            console.log("Indice", dataItem);
+            $('#ModalTitulo').html(" Editar Indices");
+                $.get("@Url.Action("_IndicesAbm","Indices")/" + id,
+                    function (data) { $('.modal-body').html(data); })
+                $('#IndicesModal').modal('show');
+            }
+
+        function Nuevo() {
+            $('#ModalTitulo').html("Agregar Indice");
+            $.get("@Url.Action("_IndicesAbm","Indices")/0",
+                function (data) { $('.modal-body').html(data); })
+            $('#IndicesModal').modal('show');
+        }
+
+        $('#IndicesModal').on('hidden.bs.modal', function (e) {
+            $('.modal-body').html("");
+            cargaIndicesGrilla();
+        })
+
+    </script>
+
+}

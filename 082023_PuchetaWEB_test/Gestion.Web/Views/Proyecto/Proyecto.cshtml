@@ -1,0 +1,119 @@
+﻿
+@{
+    ViewData["Title"] = "Proyecto";
+    Layout = "~/Views/Shared/_LayoutGestion.cshtml";
+}
+
+<div class="row">
+    <div class="col-lg-12">
+        <div class="card  card-rojo">
+            <div class="card-header cabecera">
+                <div class="btn btn-primary float-right"
+                     type="button" id="btn_Nuevo" onclick="Nuevo()">
+                    <i class="far fa-edit"></i>
+                    Agregar  Proyecto
+                </div>
+                <h5 class="m-0">Gestión de Proyectos</h5>
+            </div>
+            <div id="conten_ProyectoGrilla" class="card-body">
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade  bd-example-modal-lg"
+     id="ProyectoModal"
+     tabindex="-1"
+     role="dialog"
+     aria-labelledby="myLargeModalLabel"
+     aria-hidden="true"
+     data-backdrop="static">
+    <div class="modal-dialog  modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header cabecera">
+                <h5 id="ModalTitulo" class="modal-title"></h5>
+                <button type="button" style="color:#ffffff" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div class="modal fade  bd-example-modal-lg"
+     id="ProyectoContratistaModal"
+     tabindex="-1"
+     role="dialog"
+     aria-labelledby="myLargeModalLabel"
+     aria-hidden="true"
+     data-backdrop="static">
+    <div class="modal-dialog  modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header cabecera">
+                <h5 id="ModalTituloC" class="modal-title"></h5>
+                <button type="button" style="color:#FFFFFF" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-bodyC">
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+@section scripts  {
+
+    <script>
+
+        cargaProyectoGrilla();
+
+        function cargaProyectoGrilla() {
+            var urlAction = '@Url.Action("_ProyectoGrilla","Proyecto")';
+            $("#conten_ProyectoGrilla").load(urlAction);
+        }
+
+        function Editar(e) {
+
+            var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+            var id = dataItem.id;
+
+            $('#ModalTitulo').html(" Editar Proyecto");
+                $.get("@Url.Action("_ProyectoAbm","Proyecto")/" + id,
+                    function (data) { $('.modal-body').html(data); })
+                $('#ProyectoModal').modal('show');
+         }
+
+        function Nuevo() {
+            $('#ModalTitulo').html(" Agregar Proyecto");
+            $.get("@Url.Action("_ProyectoAbm","Proyecto")/0",
+                function (data) { $('.modal-body').html(data); })
+            $('#ProyectoModal').modal('show');
+        }
+
+        $('#ProyectoModal').on('hidden.bs.modal', function (e) {
+            $('.modal-body').html("");
+            cargaProyectoGrilla();
+        })
+
+        function Contratista(e) {
+             var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+             var id = dataItem.id;
+            $('#ModalTituloC').html("Agregar Contratista");
+            $.get("@Url.Action("_Proyecto_ContratistasAbm","Proyecto")/" + id,
+                function (data) { $('.modal-bodyC').html(data); })
+            $('#ProyectoContratistaModal').modal('show');
+        }
+
+    </script>
+
+}
+

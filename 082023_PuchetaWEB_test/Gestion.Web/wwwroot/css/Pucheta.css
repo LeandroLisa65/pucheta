@@ -1,0 +1,243 @@
+﻿body {
+}
+
+label {
+    font-size: 12px;
+}
+
+input {
+    font-size: 8px;
+}
+
+.k-grid {
+    font-size: 0.8em;
+}
+
+
+
+
+.linea {
+    border: 0.5px solid #000000
+}
+
+.btn-master {
+    width: 100%;
+    height: 40px;
+    background-color: #3b4394;
+    color: #ffffff;
+    font-size: 1em;
+    padding-top: 7px;
+    text-align: center;
+    box-shadow: 2px 2px 2px 1px rgba(0, 0, 0, 0.2);
+    border-radius: 0.8em;
+}
+
+.btn-verde {
+    width: 100%;
+    height: 40px;
+    background-color: #9BFC86 !important;
+    color: #ffffff;
+    font-size: 1em;
+    padding-top: 7px;
+    text-align: center;
+    box-shadow: 2px 2px 2px 1px rgba(0, 0, 0, 0.2);
+    border-radius: 0.8em;
+}
+
+.cabecera{
+    background-color: #3b4394;
+    color:#ffffff;
+}
+
+.btn-graba {
+    width: 90px;
+    height: 40px;
+    background-color: #3b4394;
+    color: #ffffff;
+    font-size: 1em;
+    padding-top: 7px;
+    text-align: center;
+    box-shadow: 2px 2px 2px 1px rgba(0, 0, 0, 0.2);
+    border-radius: 7px;
+}
+
+.btn-cerrar {
+    width: 90px;
+    height: 40px;
+    background-color: #f05756;
+    color: #ffffff;
+    font-size: 1em;
+    padding-top: 7px;
+    text-align: center;
+    box-shadow: 2px 2px 2px 1px rgba(0, 0, 0, 0.2);
+    border-radius: 7px;
+    float:left;
+}
+
+btn-cerrargantt {
+    width: 80px;
+    height: 30px;
+    background-color: #f05756;
+    color: #ffffff;
+    font-size: 1em;
+    padding-top: 7px;
+    text-align: center;
+    box-shadow: 2px 2px 2px 1px rgba(0, 0, 0, 0.2);
+    border-radius: 7px;
+    float: left;
+}
+
+
+.btn-cancelar {
+    width: 90px;
+    height: 40px;
+    background-color: #ffffff;
+    color: #000000;
+    font-size: 1em;
+    padding-top: 7px;
+    text-align: center;
+    box-shadow: 2px 2px 2px 1px rgba(0, 0, 0, 0.2);
+    border-radius: 7px;
+    border-color: #000000;
+    float: left;
+}
+
+.btn-Novedad {
+    width: 90px;
+    height: 40px;
+    background-color: #3b4394;
+    color: #ffffff;
+    font-size: 1em;
+    padding-top: 7px;
+    text-align: center;
+    box-shadow: 2px 2px 2px 1px rgba(0, 0, 0, 0.2);
+    border-radius: 7px;
+    border-color: #000000;
+    float: left;
+}
+
+
+.btn-cancela {
+    width: 100px;
+    height: 40px;
+    background-color: #f05756;
+    color: #ffffff;
+    font-size: 1em;
+    padding-top: 7px;
+    text-align: center;
+    box-shadow: 2px 2px 2px 1px rgba(0, 0, 0, 0.2);
+    border-radius: 7px;
+    float: left;
+}
+
+.btn-volver {
+    width: 90px;
+    height: 40px;
+    background-color: #F7580E;
+    color: #ffffff;
+    font-size: 1em;
+    padding-top: 7px;
+    text-align: center;
+    box-shadow: 2px 2px 2px 1px rgba(0, 0, 0, 0.2);
+    border-radius: 7px;
+    border-color: #000000;
+    float: left;
+}
+
+.btn-copia {
+    width: 120px;
+    height: 55px;
+    background-color: #3b4394;
+    color: #ffffff;
+    font-size: 1em;
+    padding-top: 7px;
+    text-align: center;
+    box-shadow: 2px 2px 2px 1px rgba(0, 0, 0, 0.2);
+    border-radius: 7px;
+    border-color: #000000;
+    float: left;
+}
+/*ROJO*/
+.K-bacgraundRow_R {
+    background-color: #FCB7B3 !important;
+}
+/*BLANCO*/
+.K-bacgraundRow_B {
+    background-color: #FFFFFF !important;
+}
+
+/*AMARILLO*/
+.K-bacgraundRow_A {
+    background-color: #FCFA86 !important;
+}
+/*VERDE*/
+.K-bacgraundRow_V {
+    background-color: #9BFC86 !important;
+}
+/*GRIS*/
+.K-bacgraundRow_G {
+    background-color: #808080 !important;
+}
+/*GRIS CLARO*/
+.K-bacgraundRow_GC {
+    background-color: #C0c0c0 !important;
+}
+
+/*NEGRO*/
+.K-bacgraundRow_N {
+    background-color: #ff8000 !important;
+}
+/*AZUL*/
+.K-bacgraundRow_Z {
+    background-color: #79B4F0 !important;
+}
+
+table, th, td {
+    border: 1px solid white;
+    border-collapse: collapse;
+}
+
+
+
+
+.k-task-summary-complete {
+   /* border-color: #2ea73d !important;
+    background: #2ea73d !important;*/
+    border-color: #000000 !important;
+    background: #000000 !important;
+}
+
+.k-grid-kview {
+    background-color: #007bff !important;
+    background-image: url('../dist/img/update.png') !important;
+    background-repeat: no-repeat;
+    width: 30px !important;
+    height: 30px !important;
+    min-width: 30px !important;
+}
+
+.conten-Incidentes {
+    width: 100%;
+    height: 30px;
+    background-color: #FCB7B3;
+    font-size: 1.3em;
+    text-align: center;
+}
+
+
+.conten-Novedad {
+    width: 100%;
+    height: 30px;
+    background-color: #FCFA86;
+    font-size: 1.3em;
+    text-align:center;
+}
+
+
+#div-backgroung-Gris {
+    height: 200px;
+    width: 200px;
+    border: 1px solid black;
+    display: inline-block;
+    box-sizing: border-box;
+}
