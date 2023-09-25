@@ -1,0 +1,216 @@
+﻿.loading {
+    display: none;
+    background-position: 50% 50%;
+    position: fixed;
+    z-index: 100000;
+    background-image: url('/dist/img/peploading.gif');
+    background-color: #DDF4FF;
+    opacity: 0.6;
+    filter: alpha(opacity=60);
+    background-repeat: no-repeat;
+}
+
+.tramaBack {
+    background-image: url('../dist/img/trama.png');
+    height: 100%;
+    background-position: left;
+    background-repeat: no-repeat;
+    background-size : cover;
+}
+
+.tramaBackMenu {
+    background-image: url('../dist/img/trama2.png');
+    height: 250px;
+    background-position: right;
+    background-repeat: no-repeat;
+    position: relative;
+}
+
+.saltoAr {
+    margin-top: 8px;
+}
+
+.saltoAb {
+    margin-bottom: 8px;
+}
+
+
+/* Kendo Grid Icons */
+.k-grid-kedit {
+    background-color: #007bff !important;
+    background-image: url('../dist/img/edit.png') !important;
+    background-repeat: no-repeat;
+    width: 30px !important;
+    height: 30px !important;
+    min-width: 30px !important;
+}
+
+.k-grid-kcertificate {
+    background-image: url('../dist/img/save2.png') !important;
+    background-repeat: no-repeat;
+    width: 26px !important;
+    height: 26px !important;
+    min-width: 26px !important;
+}
+
+.k-grid-kadd {
+    background-color: #3e8903 !important;
+    background-image: url('../dist/img/add.png') !important;
+    background-repeat: no-repeat;
+    width: 30px !important;
+    height: 30px !important;
+    min-width: 30px !important;
+    background-size: contain;
+    background-position: center;
+}
+
+.k-grid-kdelete {
+    background-color: #f80e06 !important;
+    background-image: url('../dist/img/delete.png') !important;
+    background-repeat: no-repeat;
+    width: 30px !important;
+    height: 30px !important;
+    min-width: 30px !important;
+}
+
+.k-grid-kcancel {
+    background-color: #655b5a !important;
+    background-image: url('../dist/img/cancel.png') !important;
+    background-repeat: no-repeat;
+    width: 30px !important;
+    height: 30px !important;
+    min-width: 30px !important;
+}
+
+.k-grid td {
+    padding-top: 0.2em !important;
+    padding-right: 0.4em !important;
+    padding-bottom: 0.2em !important;
+    padding-left: 0.4em !important;
+}
+.k-grid-header th.k-header {
+    font-weight: bold !important;
+
+}
+
+/* Styles for validation helpers*/
+.field-validation-error, .validation-summary-errors {
+    color: #ff0000;
+}
+
+    .validation-summary-errors ul {
+        list-style: none;
+    }
+
+.field-validation-valid {
+    display: none;
+}
+
+.input-validation-error {
+    background-color: #ffeeee;
+}
+
+.editbtn, .delbtn, .editnst, .delnst {
+    padding: .2em .3em;
+}
+
+/* grid btns */
+.editbtn, .delbtn, .editnst, .delnst {
+    padding: .2em .3em;
+}
+
+.ico-crud {
+    background-image: url(editdel.png);
+}
+
+.ico-edit, .ico-del {
+    display: block;
+    overflow: hidden;
+    height: 18px;
+    width: 18px;
+    background-repeat: no-repeat;
+}
+
+.ico-edit {
+    background-position: 0 -1px;
+}
+
+.ico-del {
+    background-position: -17px -1px;
+}
+/* grid btns */
+
+/* form layout */
+.efield {
+    padding: 5px 0;
+}
+
+.elabel {
+    text-align: right;
+    width: 150px;
+    display: inline-block;
+    zoom: 1;
+    *display: inline;
+    vertical-align: top;
+    margin-top: 1px;
+    padding-right: 3px;
+}
+
+    .elabel label {
+        font-weight: 600;
+    }
+
+@media (max-width: 480px) {
+    .elabel {
+        text-align: left;
+        display: block;
+    }
+}
+
+.einput {
+    display: inline-block;
+    *display: inline;
+    zoom: 1;
+    vertical-align: top;
+}
+
+    .einput .o-dd, .einput .awe-datepicker-field, .einput .awe-lookup-field, .einput, .einput .awe-multilookup-field, .einput .etxt {
+        min-width: 15em;
+    }
+
+.awe-popup .einput .awe-multilookup-field .awe-display {
+    max-height: 7.3em;
+    overflow-y: auto;
+}
+
+/* misc */
+.bar {
+    padding: 5px 0;
+}
+
+.mbtn {
+    padding: 0.4em 0.9em;
+}
+
+
+.avatar-image-container {
+    overflow: hidden;
+    width: 110px;
+    height: 110px;
+    max-height: 110px;
+    border: 2px solid #00b1ad;
+    border-radius: 110px;
+}
+
+.avatar-image-container img {
+    width: 110px;
+    height: 110px;
+}
+
+.table-striped tbody tr:nth-of-type(odd) {
+    background-color: rgba(0,0,0,0.15) !important;
+}
+
+.black-left-border {
+    border-left: solid black 2px !important
+}

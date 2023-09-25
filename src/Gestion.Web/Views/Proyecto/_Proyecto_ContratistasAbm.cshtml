@@ -1,0 +1,147 @@
+﻿@model  Gestion.Web.Models.ItemListaContratista
+
+
+    <div style="padding:10px;">
+        <div class="row">
+            <div class="col-md-12 ">
+                <input type="hidden" asp-for="Id" />
+               
+                    <div class="form-group">
+                        <label class="control-label">Contratistas</label>
+                        <div id="Conten_Contratistas"></div>
+                    </div>
+               
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-2">
+                <div class="btn-graba" type="button" onclick="GrabarProyecto_Contratistas()"><i class="fas fa-check"></i> Grabar</div>
+            </div>
+            <div class="col-md-2">
+                <div class="btn-cerrar" type="button" data-dismiss="modal"><i class="far fa-times-circle"></i> Cerrar</div>
+            </div>
+            <div class="col-md-8"></div>
+        </div>
+
+        <br />
+
+        <div class="row">
+            <div class="col-md-12">
+                <div id="grilla_Contratistas"></div>
+            </div>
+        </div>
+
+        <br />
+    </div>
+
+
+    <script>
+
+
+        var data = JSON.parse('@Html.Raw(Json.Serialize(Model))');
+        console.log(data);
+
+    grillaContratistas(data.lista);
+
+    cargaContratistas();
+
+    function GrabarProyecto_Contratistas() {
+
+        var valid = validaDatos('ProyectoContratistaModal');
+        if (!valid.isError) {
+
+            var model = {
+                ProyectoId: $('#Id').val(),
+                ContratistaId: $('#Contratista').val(),
+            };
+
+
+            $.post("/Proyecto/Proyecto_ContratistasGraba", model).done(function (e) {
+
+                if (!e.isError) {
+                    toastr.success(e.data, { timeOut: 2000 });
+                    grillaContratistas(e.data1);
+
+                } else {
+                    toastr.error(e.data, { timeOut: 2000 });
+                }
+
+            });
+
+
+        } else {
+            toastr.error(valid.mensaje, { timeOut: 2000 });
+        }
+    }
+
+
+     function grillaContratistas(datos) {
+
+         console.log(datos);
+
+        $("#grilla_Contratistas").html("<div id='contratistas'></div>");
+
+        $("#contratistas").kendoGrid({
+            dataSource: {
+                data: datos
+            },
+            columns: [
+                { field: "id", title: "Id" },
+                { field: "sContratistas", title: "Contratista" },
+                { command: { name: "btn-borrar", text: "Borrar", click: GetBorrarPContratista }, title: "", width: "75px",attributes: { style: "text-align:center;" } }
+            ]
+
+        });
+    }
+
+
+
+
+     function cargaContratistas() {
+
+        $.get("@Url.Action("GetContratistas", "Proyecto")",
+            function (data) {
+
+                if (!data.isError) {
+                    var d = '<select id="Contratista" class="form-control">';
+                    d = d + '<option value="0">Seleccione un Contratista</option>';
+                    for (var i = 0; i < data.data.length; i++) {
+                        d = d + '<option value="' + data.data[i].id + '">' + data.data[i].nombre + '</option>';
+                    }
+                    d = d + '</select>';
+
+                    $('#Conten_Contratistas').html(d);
+                }
+
+            }
+        );
+    }
+
+
+        
+    function GetBorrarPContratista(e) {
+         var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+         console.log('dataContratista',dataItem);
+         var id = dataItem.id;
+           $.post("/Proyecto/PContratistaBorra/" + id).done(function (e) {
+
+                    if (!e.isError) {
+                        toastr.success(e.data, { timeOut: 2000 });
+                        $('#ProyectoContratistaModal').modal('hide');
+                        grillaContratistas(data.lista);
+                        
+                        
+
+                    } else {
+                        toastr.error(e.data, { timeOut: 2000 });
+                    }
+
+                });
+    }
+
+
+
+
+    </script>
+

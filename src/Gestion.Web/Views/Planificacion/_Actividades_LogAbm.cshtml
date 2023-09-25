@@ -1,0 +1,89 @@
+﻿@model Gestion.EF.ItemActividades_Log
+
+<div class="row">
+    <div class="col-md-6">
+        <input type="hidden" asp-for="pp.Id" />
+        <div class="form-group">
+            <label asp-for="pp.Planificacion_Proyecto_ActividadesId" class="control-label"></label>
+            @Html.DropDownListFor(model =>
+                model.pp.Planificacion_Proyecto_ActividadesId,
+                new SelectList(Model.Planificacion_Proyecto_Actividades, "Id", "Fecha_Creacion")
+                , new { @class = "form-control" }
+            )
+
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="form-group">
+            <label asp-for="pp.Version" class="control-label"></label>
+            <input asp-for="pp.Version" type="number" class="form-control">
+            <span asp-validation-for="pp.Version" class="text-danger"></span>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="form-group">
+            <label asp-for="pp.Fecha_Est_Incio" class="control-label"></label>
+            <input asp-for="pp.Fecha_Est_Incio" type="date" name="partydate" class="form-control">
+            <span asp-validation-for="pp.Fecha_Est_Incio" class="text-danger"></span>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="form-group">
+            <label asp-for="pp.Fecha_Est_Fin" class="control-label"></label>
+            <input asp-for="pp.Fecha_Est_Fin" type="date" name="partydate" class="form-control">
+            <span asp-validation-for="pp.Fecha_Est_Fin" class="text-danger"></span>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="form-group">
+            <button type="button" class="btn btn-primary" onclick="GrabarActividades_Log()"> Grabar </button>
+            <button type="button" class="btn btn-secondary" data-dismiss="modal"> Cerrar </button>
+        </div>
+    </div>
+</div>
+
+<script>
+
+    function GrabarActividades_Log() {
+
+        var valid = validaDatos('Actividades_LogModal');
+        if (!valid.isError) {
+
+
+            var model = {
+                Id: $('#pp_Id').val(),
+                Planificacion_Proyecto_ActividadesId: $('#pp_Planificacion_Proyecto_ActividadesId').val(),
+                Version: $('#pp_Version').val(),
+                Fecha_Est_Incio: $('#pp_Fecha_Est_Incio').val(),
+                Fecha_Est_Fin: $('#pp_Fecha_Est_Fin').val(),
+
+
+            };
+
+
+            $.post("/Planificacion/Actividades_LogGraba", model).done(function (e) {
+
+                if (!e.isError) {
+                    toastr.success(e.data, { timeOut: 2000 });
+                    $('#Actividades_LogModal').modal('hide');
+
+                } else {
+                    toastr.error(e.data, { timeOut: 2000 });
+                }
+
+            });
+
+
+        } else {
+            toastr.error(valid.mensaje, { timeOut: 2000 });
+        }
+    }
+
+
+</script>

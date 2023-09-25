@@ -1,0 +1,121 @@
+﻿@model List<Gestion.EF.Models.Informe_Actividad_Vencida>
+
+<div class="form-group">
+    <div class="row">
+        <div id="divFiltroProyectos" class="col-md-3"></div>
+        <div id="divFiltroUbicaciones" class="col-md-3"></div>
+        <div id="divFiltroActividades" class="col-md-3"></div>
+        <div class="col-md-3">
+            <button type="button" onclick="Filtrar()" class="btn btn-default float-right"
+                    style="margin-top: 1.9em">
+                <i class="fa fa-search"></i>
+                Buscar
+            </button>
+        </div>
+    </div>
+</div>
+<div id="divGrilla"></div>
+
+<script>
+
+    var lInfActVencidas = JSON.parse('@Html.Raw(Json.Serialize(Model))');
+
+    function renderizarFiltroProyectos() {
+        var lProyectos = [];
+        lInfActVencidas.forEach(iac => {
+            if (!lProyectos.find(p => p.id == iac.proyectoId)) {
+                lProyectos.push({ id: iac.proyectoId, nombre: iac.sProyecto });
+            }
+        });
+        var select = "<label>Proyecto</label><select id='slcProyectos' class='form-control'>#items</select>";
+        var options = "<option value='0' selected>Todos</option>";
+        lProyectos.forEach(p => {
+            options += "<option value='" + p.id + "'>" + p.nombre + "</option>";
+        })
+        select = select.replace("#items", options);
+        var divFiltroProyectos = document.getElementById("divFiltroProyectos");
+        divFiltroProyectos.innerHTML = select;
+    }
+    function renderizarFiltroUbicaciones() {
+        var lUbicaciones = [];
+        lInfActVencidas.forEach(iac => {
+            if (!lUbicaciones.find(a => a.id == iac.proyectoUbicacionId)) {
+                lUbicaciones.push({ id: iac.proyectoUbicacionId, nombre: iac.sProyUbicacion });
+            }
+        });
+        var select = "<label>Ubicación</label><select id='slcUbicaciones' class='form-control'>#items</select>";
+        var options = "<option value='0' selected>Todas</option>";
+        lUbicaciones.forEach(a => {
+            options += "<option value='" + a.id + "'>" + a.nombre + "</option>";
+        })
+        select = select.replace("#items", options);
+        var divFiltroUbicaciones = document.getElementById("divFiltroUbicaciones");
+        divFiltroUbicaciones.innerHTML = select;
+    }
+    function renderizarFiltroActividades() {
+        var lActividades = [];
+        lInfActVencidas.forEach(iac => {
+            if (!lActividades.find(a => a.id == iac.planActividadId)) {
+                lActividades.push({ id: iac.planActividadId, nombre: iac.sPlanActividad });
+            }
+        });
+        var select = "<label>Actividad</label><select id='slcActividades' class='form-control'>#items</select>";
+        var options = "<option value='0' selected>Todas</option>";
+        lActividades.forEach(a => {
+            options += "<option value='" + a.id + "'>" + a.nombre + "</option>";
+        })
+        select = select.replace("#items", options);
+        var divFiltroActividades = document.getElementById("divFiltroActividades");
+        divFiltroActividades.innerHTML = select;
+    }
+    function renderizarGrilla() {
+        $("#divGrilla").html("<div id='divGrillaResultado'></div>");
+        var columns = [];
+        columns.push({ field: "Id", title: "id", media: "(min-width: 450px)", hidden: true });
+        columns.push({ field: "sProyecto", title: "Proyecto", media: "(min-width: 450px)" });
+        columns.push({ field: "sProyUbicacion", title: "Ubicación", media: "(min-width: 450px)" });
+        columns.push({ field: "sPlanActividad", title: "Actividad", media: "(min-width: 450px)" });
+        columns.push({ field: "fechaEstimadaFin", title: "Fecha Est. Fin", media: "(min-width: 450px)" });
+        columns.push({ field: "diasVencida", title: "Dias Vencida", media: "(min-width: 450px)" });
+        columns.push({ field: "fechaUltimoAvance", title: "Fec. Último Avance", media: "(min-width: 450px)" });
+        columns.push({ field: "porcAvanceObra", title: "% Avance de Obra", media: "(min-width: 450px)" });
+        $("#divGrillaResultado").kendoGrid({
+            filterable: false,
+            sortable: true,
+            groupable: false,
+            reorderable: true,
+            columnMenu: true,
+            toolbar: ["excel"],
+            excel: {
+                fileName: "InformeActidadesVencidas.xlsx",
+                allPages: true,
+                filterable: true
+            },
+            dataSource: {
+                data: lInfActVencidas
+            },
+            columns: columns,
+        });
+    }
+
+    renderizarFiltroProyectos();
+    renderizarFiltroUbicaciones();
+    renderizarFiltroActividades();
+    renderizarGrilla();
+
+    function Filtrar() {
+        var oFiltro = {
+            IdProyecto: document.getElementById("slcProyectos").value,
+            IdUbicacion: document.getElementById("slcUbicaciones").value,
+            IdActividad: document.getElementById("slcActividades").value
+        }
+        $.post("/ParteDiario/Get_InformeActividadesVencidas_X_oFiltro", oFiltro).done(function (res) {
+            if (!res.error) {
+                lInfActVencidas = res.lInfActVencidas;
+                renderizarGrilla();
+            }
+        });
+    }
+
+</script>
+

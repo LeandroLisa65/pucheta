@@ -1,0 +1,200 @@
+﻿@model Gestion.EF.Models.Indices
+
+<div class="row">
+    <div class="col-lg-12 ">
+        <div class="row">
+            <input type="hidden" asp-for="Id" />
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label asp-for="Codigo" class="control-label"></label>
+                    <input asp-for="Codigo" type="text" class="form-control">
+                    <span asp-validation-for="Codigo" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="col-md-8">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <div class="form-group">
+                    <label asp-for="Nombre" class="control-label"></label>
+                    <input asp-for="Nombre" class="form-control" />
+                    <span asp-validation-for="Nombre" class="text-danger"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-2">
+        <div class="btn-graba" type="button" onclick="GrabarIndices()"><i class="fas fa-check"></i> Grabar</div>
+    </div>
+    <div class="col-md-2">
+        <div class="btn-cerrar" type="button" data-dismiss="modal"><i class="far fa-times-circle"></i> Cerrar</div>
+    </div>
+    <div class="col-md-8"></div>
+</div>
+<br />
+<hr />
+<br />
+<div class="row" id="pnlValores">
+    <div class="col-md-12" >
+        <div class="row">
+            <div class="col-md-4"> <h5 class="card-title">Listado de Valores del Indice</h5></div>
+            <div class="col-md-8"></div>
+        </div>
+        <div class="row">
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label>Mes:</label>
+                    <input type="number" max="12" min="1" id="txtMes" class="form-control" />
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label>Año:</label>
+                    <input type="number" min="2022" max="2030" id="txtAno" class="form-control" />
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label>Valor:</label>
+                    <input type="text" id="txtValor" class="form-control" />
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-2">
+                <div class="btn-graba" type="button" onclick="GrabarIndice_Valor()"><i class="fas fa-check"></i> Grabar</div>
+            </div>
+            <div class="col-md-2">
+                <div class="btn-cerrar" type="button" onclick="LimpiarIndice_Valor()"><i class="far fa-times-circle"></i> Limpiar</div>
+            </div>
+            <div class="col-md-8"></div>
+        </div>
+        <br />
+        <div class="row">
+            <div id="GrillaKendo2"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+
+    function GrabarIndices() {
+
+        var valid = validaDatos('IndicesModal');
+        if (!valid.isError) {
+            var model = {
+                Id: $('#Id').val(),
+                Nombre: $('#Nombre').val(),
+                Codigo: $('#Codigo').val()
+            };
+            $.post("/Indices/IndicesGraba", model).done(function (e) {
+
+                if (!e.isError) {
+                    toastr.success(e.data, { timeOut: 2000 });
+                    $('#Id').val(e.data1);
+                    $("#pnlValores").show();
+                    LimpiarIndice_Valor();
+                    
+
+                } else {
+                    toastr.error(e.data, { timeOut: 2000 });
+                }
+            });
+        } else {
+            toastr.error(valid.mensaje, { timeOut: 2000 });
+        }
+    }
+
+    function LimpiarIndice_Valor() {
+
+        var fechaActual = new Date();
+        $('#txtMes').val(fechaActual.getMonth());
+        $('#txtAno').val(fechaActual.getFullYear());
+        $('#txtValor').val(0.0);
+    }
+
+    function cargaIndice_ValorGrilla() {
+        var model = {
+            Text: $('#Id').val(),
+            Value: $('#Id').val()
+        };
+        $.post("/Indices/CargoIndice_ValoresGrilla", model).done(
+            function (data) {
+                if (!data.isError) {
+                    //Cargar Grilla de Valores
+                    grillaValores(data.data)
+                    LimpiarIndice_Valor();
+                }
+            });
+    }
+
+    function grillaValores(datos) {
+
+        $("#GrillaKendo2").html("<div id='conten_GrillaValoresIndices'></div>");
+
+        $("#conten_GrillaValoresIndices").kendoGrid({
+            filterable: true,
+            sortable: true,
+            dataSource: {
+                data: datos
+            },
+            columns: [
+
+                { field: "id", title: "Id", width: "60px", media: "(min-width: 850px)" },
+                { field: "mes", title: "Mes", media: "(min-width: 450px)" },
+                { field: "ano", title: "Año", media: "(min-width: 450px)" },
+                { field: "valor", title: "Valor", media: "(min-width: 450px)" },
+                { command: { name: "kdelete", text: "", click: BorrarValor }, title: "Borrar", width: "65px", attributes: { style: "text-align:center;" } }
+            ]
+        });
+    }
+
+    function BorrarValor(e) {
+
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+        var id = dataItem.id;
+
+        var model = {
+            Text:id,
+            Value: id
+        };
+        $.post("/Indices/BorrarIndice_Valores", model).done(
+            function (data2) {
+                data = data2;
+                //Cargar Grilla de Valores
+                cargaIndice_ValorGrilla()
+            });
+    }
+            
+
+    function GrabarIndice_Valor() {
+        var model = {
+            IdIndice: $('#Id').val(),
+            Mes: $('#txtMes').val(),
+            Ano: $('#txtAno').val(),
+            Valor: $('#txtValor').val()
+        };
+        $.post("/Indices/IndicesValoresGraba", model).done(function (e) {
+
+            if (!e.isError) {
+                toastr.success(e.data, { timeOut: 2000 });
+                //Cargar Grilla de Valores
+                cargaIndice_ValorGrilla()
+            } else {
+                toastr.error(e.data, { timeOut: 2000 });
+            }
+        });
+    }
+    var mIndice = $('#Id').val();
+    if (mIndice != "0") {
+        $("#pnlValores").show();
+        cargaIndice_ValorGrilla();
+        LimpiarIndice_Valor();
+    }
+    else {
+        $("#pnlValores").hide();
+    }
+    
+
+</script>

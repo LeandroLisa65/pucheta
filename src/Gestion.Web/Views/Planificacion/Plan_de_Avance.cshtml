@@ -1,0 +1,732 @@
+﻿@model Res_Gantt
+@{
+    ViewData["Title"] = "Plan_de_Avance";
+    Layout = "~/Views/Shared/_LayoutGestionNoMenu.cshtml";
+}
+
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+
+<div>
+    <style>
+        body {
+            overflow: hidden; /* Hide scrollbars */
+        }
+    </style>
+    <div style="height: 1.5em; margin: 0.5em 1em 0.5em 1em" class="row">
+        <div class="icheck-primary d-inline" style="width:33%;">
+            <input type="checkbox" id="inpSoloPlanificadas">
+            <label for="inpSoloPlanificadas" class="control-label">Solo Planificadas</label>
+        </div>
+        <span id="divTitulo"></span>
+    </div>
+    <div id="divGantt" style="overflow: hidden;">
+    </div>
+</div>
+<script id="editor" type="text/x-kendo-template">
+
+    <table width="98%">
+        <tbody>
+            <tr>
+                <td colspan="2" style="text-align: center">
+                    <h3>
+                        Editando Tarea
+                    </h3>
+                </td>
+            </tr>
+            <tr>
+                <td style="text-align:right; width: 30%"><label>Padres:</label></td>
+                <td>
+                    <div id="divActPadres" style="padding-left:5px"></span>
+                </td>
+            </tr>
+            <tr>
+                <td style="text-align:right; width: 30%"><label>Hijas:</label></td>
+                <td>
+                    <div id="divActHijas" style="padding-left:5px"></span>
+                </td>
+            </tr>
+            <tr>
+                <td style="text-align:right; width: 30%"><label>Fecha Real Inicio:</label></td>
+                <td>
+                    <span id="spnFecInicioReal" style="padding-left:5px"></span>
+                </td>
+            </tr>
+            <tr>
+                <td style="text-align:right; width: 25%"><label>Fecha Real Fin:</label></td>
+                <td>
+                    <span id="spnFecFinReal" style="padding-left:5px"></span>
+                </td>
+            </tr>
+            <tr>
+                <td style="text-align:right; width: 25%"><label>Avance:</label></td>
+                <td>
+                    <span id="spnPorcAvances" style="padding-left:5px"></span>
+                </td>
+            </tr>
+            <tr>
+                <td style="text-align:right; width: 25%"><label>Título:</label></td>
+                <td>
+                    <span id="spnTitle" style="padding-left:5px"></span>
+                </td>
+            </tr>
+            <tr>
+                <td style="text-align:right; width: 25%"><label>Comentario:</label></td>
+                <td>
+                    <p id="pComentario" style="padding-left:5px"></p>
+                </td>
+            </tr>
+            <tr>
+                <td style="text-align:right"><label>Inicio:</label></td>
+                <td>
+                    <input data-role="datetimepicker" data-format="dd/MM/yyyy hh:mm" name="start" />
+                </td>
+            </tr>
+            <tr>
+                <td style="text-align:right"><label>Fin:</label></td>
+                <td>
+                    <input data-role="datetimepicker" data-format="dd/MM/yyyy hh:mm" name="end" />
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</script>
+<script id="column-template" type="text/x-kendo-template">
+    <img class="tree-list-img" src="https://demos.telerik.com/kendo-ui/content/web/gantt/resources/Darrel%20Solis.jpg" alt="#: teamLead #" />
+    <span class="team-lead-name">#= teamLead #</span>
+</script>
+
+@section scripts
+{
+    <script>
+
+        //#region Limpieza JSON
+        JSON.stringify = JSON.stringify || function (obj) {
+            var t = typeof (obj);
+            if (t != "object" || obj === null) {
+                // simple data type
+                if (t == "string") obj = '"' + obj + '"';
+                return String(obj);
+            }
+            else {
+                // recurse array or object
+                var n, v, json = [], arr = (obj && obj.constructor == Array);
+                for (n in obj) {
+                    v = obj[n]; t = typeof (v);
+                    if (t == "string") v = '"' + v + '"';
+                    else if (t == "object" && v !== null) v = JSON.stringify(v);
+                    json.push((arr ? "" : '"' + n + '":') + String(v));
+                }
+                var rawString = (arr ? "[" : "{") + String(json) + (arr ? "]" : "}");
+                return rawString;
+            }
+        };
+        function escape(key, val) {
+            if (typeof (val) != "string") return val;
+
+            var replaced = val
+            return replaced;
+        }
+        JSON.stringifyEscaped = function (obj) {
+            return JSON.stringify(obj, escape);
+        }
+        //#endregion
+
+        //#region PRIMER CARGA DE GANTT Y VARIABLES GLOBALES
+        let oData = JSON.parse(JSON.stringifyEscaped(@Html.Raw(Json.Serialize(Model))));
+        oData.primerCarga = true;
+        let oFiltro = {lEstados: ["Solo Activas"]};
+        let startRevert = "";
+        let endRevert = "";
+        let idTaskToScroll = 0;
+        let IdActividadSeleccionada = 0;
+        let IdUbicacionSeleccionada = 0;
+        let EstadoSeleccionado = oData.lEstados[0];
+        let lActividadesSeleccionadas = [];
+        let lUbicacionesSeleccionadas = [];
+        let lEstadosSeleccionados = [];
+        let lOpcionesFiltro = [];
+
+        renderGantt();
+
+        //#endregion
+
+        //#region FUNCIONES
+
+        function renderGantt() {
+            cambiarTitulo(oData);
+            var lAvances = oData.lAvances;
+            lAvances.forEach(a => {
+                if (a.type == "Estimado")
+                    a.estado = "***" + a.estado + "***"
+                if (a.type == "Real")
+                    a.id = a.id * -1;
+            });
+            var lPPA_Dependencias = oData.lPPA_Dependencias;
+            var height = $(window).height() - 30;
+            $("#divGantt").html("<div id='Gantt'></div>");
+            $("#Gantt").kendoGantt({
+                dataSource: lAvances,
+                dependencies: lPPA_Dependencias,
+                views: [
+                    {
+                        type: "month",
+                        monthHeaderTemplate: "#=kendo.toString(start, 'MMMM, yyyy')#",
+                        weekHeaderTemplate: "#=kendo.toString(start, 'dd.MM')# - #=kendo.toString(kendo.date.addDays(end, -1), 'dd.MM')#",
+                        selected: true
+                    },
+                    {
+                        type: "week",
+                        weekHeaderTemplate: "#=kendo.toString(start, 'dd.MM.yy')# - #=kendo.toString(kendo.date.addDays(end, -1), 'dd.MM.yy')#",
+                        dayHeaderTemplate: "#=kendo.toString(start, 'dd.MM')# - #=kendo.toString(kendo.date.addDays(end, -1), 'dd.MM')#"
+                    },
+                    {
+                        type: "day",
+                        dayHeaderTemplate: kendo.template("#=kendo.toString(start, 'ddd dd.MM.yyyy')#")
+                    },
+                ],
+                columns: [
+                    { field: "estado", title: "Estado", width: 60 },
+                    { field: "type", title: "Planificacion", width: 80, },
+                    { field: "title", title: "Ubicacion - Actividad", width: 260, },
+                    { field: "rubro_nombre", title: "Rubro", width: 130 },
+                    { field: "comentario", title: "Comentario", width: 160 },
+                    { field: "start", title: "F. Inicio", format: "{0:dd/MM/yyyy}", width: 130 },
+                    { field: "end", title: "F. Fin", format: "{0:dd/MM/yyyy}", width: 130 },
+                    
+                ],
+                tooltip: {
+                    visible: true,
+                    template: getToolTip
+                },
+                dataBound: onDataBound,
+                toolbar: ["pdf"],
+                pdf: {
+                    fileName: "Gantt.pdf",
+                },
+                columnMenu: true,
+                filterable: true,
+                reorderable: true,
+                height: height,
+                showWorkHours: true,
+                showWorkDays: true,
+                resizable: true,
+                snap: false,
+                selectable: true,
+                editable: {
+                    template: $("#editor").html(),
+                    dependencyCreate: true
+                },
+                messages: {
+                    deleteTaskWindowTitle: "Eliminar",
+                    deleteTaskConfirmation: "¿Realmente desea eliminar la tarea?",
+                },
+                add: function (e) {
+                    if (e.dependency) {
+                        if (e.dependency.type == 1) {
+                            grabarDependencia(e.dependency);
+                        }
+                        else e.preventDefault();
+                    }
+                },
+                edit: function (e) {
+                    if (e.task.type == 'Real') {
+                        e.preventDefault();
+                    }
+                    else {
+                        console.log("Editando tarea...");
+                        setTimeout(function () {
+                            var divActPadres = document.getElementById("divActPadres");
+                            divActPadres.innerHTML = e.task.detalleActPadres;
+                            var divActHijas = document.getElementById("divActHijas");
+                            divActHijas.innerHTML = e.task.detalleActHijas;
+                            var fecInicioReal = document.getElementById("spnFecInicioReal");
+                            fecInicioReal.innerHTML = e.task.fecInicioReal;
+                            var fecFinReal = document.getElementById("spnFecFinReal");
+                            fecFinReal.innerHTML = e.task.fecFinReal;
+                            var spnPorcAvances = document.getElementById("spnPorcAvances");
+                            spnPorcAvances.innerHTML = e.task.avance;
+                            var spnTitle = document.getElementById("spnTitle");
+                            spnTitle.innerHTML = e.task.title;
+                            var pComentario = document.getElementById("pComentario");
+                            pComentario.innerHTML = e.task.comentario ? e.task.comentario : 'Sin comentario registrado.';
+                            var btnBorrar = document.getElementsByClassName("k-gantt-delete");
+                            btnBorrar[0].style = "display: none";
+                        }, 200);
+                    }
+                },
+                remove: function (e) {
+                    if (e.dependencies.length > 0) {
+                        borrarDependencia(e.dependencies[0]);
+                    }
+                    else {
+                        alert("Acción no permitida");
+                        e.preventDefault();
+                    }
+                },
+                resizeStart: function (e) {
+                    if (e.task.type == 'Real') {
+                        e.preventDefault();
+                        return;
+                    }
+                    if (e.task.estado.includes("Finalizada")) {
+                        e.preventDefault();
+                        return;
+                    }
+                    startRevert = e.task.start;
+                    endRevert = e.task.end;
+                },
+                resizeEnd: function (e) {
+                    if (e.start != startRevert && e.task.avance > 0) {
+                        e.preventDefault();
+                    }
+                },
+                moveStart: function (e) {
+                    if (e.task.type == 'Real') {
+                        e.preventDefault();
+                        return;
+                    }
+                    if (e.task.estado.includes("Finalizada")) {
+                        e.preventDefault();
+                        return;
+                    }
+                    startRevert = e.task.start;
+                    endRevert = e.task.end;
+                },
+                moveEnd: function (e) {
+                    if (e.start != startRevert && e.task.avance > 0) {
+                        e.preventDefault();
+                    }
+                },
+                save: grabarCambios,
+            });
+            oData.primerCarga = oData.primerCarga ? false : true;
+            cambiarApariencia(oData);
+            renderTagsOpciones();
+        }
+
+        function cambiarTitulo(data) {
+            var titulo = "<p style='text-align:center; width:100%'><span title='" + data.nombreProyecto + "'>" + data.nombreProyecto +
+                " - " + data.fecProgramadaFin + " - " + data.fecEstimadaFin + " - </span>";
+            titulo += "<span title='Dias de diferencia entre Fec. Prog. Fin y Fec. Est. Fin' style='margin-left:0.5em; color: " +
+                (data.diasDiferencia > 0 ? 'red' : (data.diasDiferencia == 0 ? 'blue' : 'green')) + "'> " +
+                data.diasDiferencia + "</span></p>";
+            var divTitulo = document.getElementById('divTitulo');
+            divTitulo.innerHTML = titulo;
+        }
+
+        function cambiarApariencia(data) {
+            var headers = document.getElementsByClassName("k-floatwrap k-header k-gantt-toolbar");
+            var header = headers[0];
+            var divCustomHeader = document.createElement("div");
+            var contenidoNuevo = "<div class='row'>";
+            contenidoNuevo += "<div class='col-md-12'>";
+            contenidoNuevo += "<div class='row'>";
+            contenidoNuevo += "<button type='button' class='btn btn-default' onclick='Volver()' style='float:left;' title='Volver'>" +
+                "<i class='fas fa-arrow-left'></i></button>";
+            contenidoNuevo += "<input id='inpFecDesde' type='date' style='width:16%; height: 1.9em; font-size:0.8em; line-height:normal'/>";
+            contenidoNuevo += "<input id='inpFecHasta' type='date' style='width:16%; height: 1.9em; font-size:0.8em; line-height:normal'/>";
+            contenidoNuevo += getSelectUbicaciones(data.lUbicaciones);
+            contenidoNuevo += getSelectActividades(data.lActividades);
+            contenidoNuevo += getSelectEstados(data.lEstados);
+            contenidoNuevo += "<button style='margin-left: 1.5em' class='btn btn-primary btn-xs'" +
+                " title='Buscar y Generar Gantt' onclick='idTaskToScroll = 0; getDataGant()'>" +
+                "<i class='fas fa-search'></i> Buscar</button>";
+            contenidoNuevo += "</div><div class='row' id='divTagsOpciones'></div>";
+            divCustomHeader.innerHTML = contenidoNuevo;
+            header.appendChild(divCustomHeader);
+            document.getElementById('inpFecDesde').value = oFiltro.FechaDesde;
+            document.getElementById('inpFecHasta').value = oFiltro.FechaHasta;
+            var footer = document.getElementsByClassName("k-floatwrap k-header k-gantt-toolbar");
+            footer[1].style.display = "none";
+            var divPdf = document.getElementsByClassName("k-gantt-actions");
+            divPdf[0].style.float = "right";
+            var btnPdf = document.getElementsByClassName("k-button k-button-icontext k-gantt-pdf");
+            btnPdf[0].style = "margin-top:0.25em";
+
+            var lCeldas = document.querySelectorAll('[role="gridcell"]');
+            var style = "height: 15px; width: 15px; border-radius: 50%; display: inline-block;";
+            for (var i = 0; i < lCeldas.length; i++) {
+                var celda = lCeldas[i];
+                if (celda.innerHTML.includes("***Finalizada**")) {
+                    celda.innerHTML = "<span class='bg-green' title='Finalizada' style='" + style + "'></span>";
+                }
+                if (celda.innerHTML.includes("***Vencida***")) {
+                    celda.innerHTML = "<span class='bg-red' title='Vencida' style='" + style + "'></span>";
+                }
+                if (celda.innerHTML.includes("***En Curso***")) {
+                    celda.innerHTML = "<span class='bg-blue' title='En Curso' style='" + style + "'></span>";
+                }
+                if (celda.innerHTML.includes("***Atrasada***")) {
+                    celda.innerHTML = "<span class='bg-yellow' title='Atrasada' style='" + style + "'></span>";
+                }
+                if (celda.innerHTML.includes("***Programada***")) {
+                    celda.innerHTML = "<span title='Programada' style='" + style + "border: 1px solid gray;'></span>";
+                }
+            }
+        }
+
+        function getToolTip(e) {
+            var template = "<div style='text-align: left; width: 15em'>";
+            var fi_dd = String(e.task.start.getDate()).padStart(2, '0');
+            var fi_mm = String(e.task.start.getMonth() + 1).padStart(2, '0');
+            var fi_yyyy = e.task.start.getFullYear();
+            var ff_dd = String(e.task.end.getDate()).padStart(2, '0');
+            var ff_mm = String(e.task.end.getMonth() + 1).padStart(2, '0');
+            var ff_yyyy = e.task.end.getFullYear();
+            var fechaInicio = fi_dd + "/" + fi_mm + "/" + fi_yyyy;
+            var fechaFin = ff_dd + "/" + ff_mm + "/" + ff_yyyy;
+            var tipo = e.task.type == "Estimado" ? "Est." : "Real";
+            template += "Fecha " + tipo + " Inicio: <strong>" + fechaInicio + "</strong><br />";
+            if (tipo == 'Real') {
+                if (e.task.finalizado) {
+                    template += "Fecha " + tipo + " Fin: <strong>" + fechaFin + "</strong><br />";
+                }
+                else if (e.task.avance > 0) {
+                    template += "Fecha Últ. Avance: <strong>" + fechaFin + "</strong><br />";
+                }
+            }
+            else {
+                template += "Fecha " + tipo + " Fin: <strong>" + fechaFin + "</strong><br />";
+            }
+            template += "Ubicación: <strong>" + e.task.ubicacion + "</strong><br />";
+            template += "Actividad: <strong>" + e.task.actividades_nombre + "</strong><br />";
+            template += "Avance: <strong>" + (e.task.avance * 100).toFixed(2) + "%</strong><br />";
+            template += "Comentario: <p><strong>" + (e.task.comentario ? e.task.comentario : 'Sin comentario registrado.') + "</strong></p>";
+            template += "</div>";
+            return template;
+        }
+
+        function getDataGant() {
+            oData.primerCarga = true;
+            let lUbicaciones = lOpcionesFiltro.filter(o => o.tipo == 'ubicacion');
+            let lActividades = lOpcionesFiltro.filter(o => o.tipo == 'actividad');
+            let lEstados = lOpcionesFiltro.filter(o => o.tipo == 'estado');
+            let fecDesde = document.getElementById("inpFecDesde").value;
+            let fecHasta = document.getElementById("inpFecHasta").value;
+            let soloPlanificadas = document.getElementById("inpSoloPlanificadas").checked;
+            oFiltro = {
+                IdProyecto: oData.idProyecto,
+                lIdsProyUbicaciones: lUbicaciones.map(u => u.id),
+                lIdsPlanActividades: lActividades.map(a => a.id),
+                lEstados: lEstados.map(e => e.nombre),
+                FechaDesde: fecDesde,
+                FechaHasta: fecHasta,
+                SoloPlanificadas: soloPlanificadas
+            };
+            console.log(oFiltro);
+            $.post("/Planificacion/GetAvances", oFiltro).done(
+                function (res) {
+                    if (!res.error) {
+                        console.log("Búsqueda de avances exitosa.");
+                        var data = res.data;
+                        oData.lAvances = data.lAvances;
+                        oData.lPPA_Dependencias = data.lPPA_Dependencias;
+                        renderGantt();
+                    }
+                    else {
+                        alert("Ocurrió un error! Si el problema persiste, contacte con el administrador.");
+                        console.log("Error: " + res.message);
+                    }
+                }
+            );
+        }
+
+        function onDataBound() {
+            colorearTareas(this);
+            if (oData.primerCarga)
+                scrollAFechaActual(this);
+        }
+
+        function colorearTareas(gantt) {
+            gantt.element.find(".k-task").each(function (e) {
+                var dataItem = gantt.dataSource.getByUid($(this).attr("data-uid"));
+                if (dataItem.fechaEstInicio == dataItem.fechaEstInicioOriginal &&
+                    dataItem.fechaEstFin == dataItem.fechaEstFinOriginal ) {
+                    if (dataItem.vencido) {
+                        this.style.backgroundColor = "#dc3545";
+                    }
+                    else if (dataItem.finalizado) {
+                        this.style.backgroundColor = "#28a745";
+                    }
+                    else if (dataItem.estado.includes("Atrasada")) {
+                        this.style.backgroundColor = "#ffc107";
+                    }
+                    else if (dataItem.estado.includes("En Curso")) {
+                        this.style.backgroundColor = "#17a2b8";
+                    }
+                    else {
+                        this.style.backgroundColor = "#ffffff";
+                        this.style.color = "#000000"
+                    }
+                }
+                else {
+                    this.style.backgroundColor = "#ff8533";
+                }
+            });
+        }
+
+        function scrollAFechaActual(gantt) {
+            var view = gantt.timeline.view();
+            if (idTaskToScroll == 0) {
+                var left = view._offset(new Date());
+                view.content.scrollLeft(left);
+            }
+            else {
+                var i = 0;
+                while (i < oData.lAvances.length && oData.lAvances[i].id != idTaskToScroll) {
+                    i++;
+                }
+                var task = oData.lAvances[i];
+                var left = view._offset(new Date(task.start));
+                view.content.scrollLeft(left);
+                view.content.scrollTop(view._rowHeight * (i-5));
+            }
+        }
+
+        function tablaHtml(d) {
+            var html = "";
+            for (var i = 0; i < d.avance.length; i++) {
+                html = html + "<h5>" + d.avance[i].proyectos.nombre + " / fecha incio : " + d.avance[i].proyectos.fecha_Inicio + " / Duración : " + d.avance[i].proyectos.duracion + "</h5><br>"
+                html = html + "<table class='table'>";
+                html = html + "<thead>";
+                html = html + "<tr>";
+                html = html + "<th> Ubicación</th>";
+                html = html + "<th> Rubro</th>";
+                html = html + "<th> Actividad</th>";
+                html = html + "<th> Tipo </th > ";
+                html = html + "<th> Avance</th>";
+                html = html + "<th style='text-align:center'> Semana 1</th>";
+                html = html + "<th style='text-align:center'> Semana 2</th>";
+                html = html + "</tr>";
+                html = html + "</thead>";
+                html = html + "<tbody>";
+                for (var u = 0; u < d.avance[i].ubicaciones.length; u++) {
+                    var ubi = d.avance[i].ubicaciones[u].actividades[0];
+                    html = html + "<tr>";
+                    html = html + "<td> " + d.avance[i].ubicaciones[u].ubicacion.nombre + "</td>";
+                    html = html + "<td> ";
+                    if (ubi != undefined) {
+                        html = html + ubi.actividad.planificacion_Actividades_Rubro.nombre;
+                    }
+                    html = html + "</td>";
+                    html = html + "<td>"
+                    if (ubi != undefined) {
+                        html = html + ubi.actividad.planificacion_Actividades.nombre;
+                    }
+                    html = html + "</td>";
+                    html = html + "<td> P</td>";
+                    html = html + "<td> 10 %</td>";
+                    html = html + "<td style='text-align:center'>X</td>";
+                    html = html + "<td style='text-align:center'></td>";
+                    html = html + "</tr>";
+                }
+                html = html + "</tbody>";
+                html = html + "</table>";
+            }
+            return html;
+        }
+
+        function daysToMilliseconds(days) {
+            return days * 24 * 60 * 60 * 1000;
+        }
+
+        function grabarCambios(e) {
+            var fecha_Inicio = "";
+            var fecha_Fin = "";
+            console.log("Grabando cambios...");
+            var fecInicio = e.values.start ? e.values.start : e.task.start;
+            var fecFin = e.values.end ? e.values.end : e.task.end;
+            fecha_Inicio = fecInicio.getUTCFullYear() + "-" + (fecInicio.getUTCMonth() + 1) + "-" + fecInicio.getUTCDate();
+            fecha_Fin = fecFin.getUTCFullYear() + "-" + (fecFin.getUTCMonth() + 1) + "-" + fecFin.getUTCDate();
+            var oPlanProyActividad = {
+                id: e.task.id,
+                idProyecto: oData.idProyecto,
+                fecha_Est_Incio: fecha_Inicio,
+                fecha_Est_Fin: fecha_Fin
+            };
+            var revertirCambio = function (e) {
+                e.task.set('start', startRevert);
+                e.task.set('end', endRevert);
+                e.sender.dataSource.sync();
+            };
+            $.post("/Planificacion/ActualizarPlanProyActividad", oPlanProyActividad).done(
+                function (res) {
+                    if (!res.error) {
+                        if (res.oResult.cambioAplicable) {
+                            console.log("Cambio grabado con éxito.");
+                            oData.fecEstimadaFin = res.fecEstimadaFin;
+                            cambiarTitulo(oData);
+                            idTaskToScroll = oPlanProyActividad.id;
+                            if (res.oResult.lPlanProyActividades_Resultante.length > 1) {
+                                getDataGant();
+                            }
+                        }
+                        else {
+                            toastr.error(res.oResult.message, { timeOut: 2000 });
+                            revertirCambio(e);
+                        }
+                    }
+                    else {
+                        toastr.error(res.message, { timeOut: 2000 });
+                        if (res.ex) console.log("Error: " + res.ex);
+                        revertirCambio(e);
+                    }
+                }
+            );
+        }
+
+        function grabarDependencia(d) {
+            var oDependencia = {
+                Id: d.id,
+                PPAHijaId: d.successorId,
+                PPAPadreId: d.predecessorId
+            };
+            $.post("/Planificacion/AgregarDepedencia", oDependencia).done(
+                function (res) {
+                    if (!res.error) {
+                        console.log(res.message);
+                    }
+                    else {
+                        alert("Ocurrió un error! Si el problema persiste, contacte con el administrador.");
+                        console.log("Error: " + res.message);
+                    }
+                }
+            );
+        }
+
+        function borrarDependencia(d) {
+            var oDependencia = {
+                PPAHijaId: d.successorId,
+                PPAPadreId: d.predecessorId
+            };
+            $.post("/Planificacion/BorrarDepedencia", oDependencia).done(
+                function (res) {
+                    if (!res.error) {
+                        console.log(res.message);
+                    }
+                    else {
+                        alert("Ocurrió un error! Si el problema persiste, contacte con el administrador.");
+                        console.log("Error: " + res.message);
+                    }
+                }
+            );
+        }
+
+        function Volver() {
+            window.location.replace("/Proyecto/Proyecto");
+        }
+
+        function getSelectActividades(lActividades) {
+            var select = '<select id="slcActividades" style="width:16%; height:1.6em;" ' +
+                'onchange="seleccionarActividad()">#options</select>';
+            var options = '<option value="0" ' + (IdActividadSeleccionada == 0 ? 'selected' : '') + '>Actividad</option>';
+            lActividades.forEach(a => {
+                options += '<option value="' + a.id + '" ' + (IdActividadSeleccionada == a.id ? 'selected' : '') + '>' + a.nombre + '</option>';
+            });
+            select = select.replace("options", options);
+            return select;
+        }
+
+        function getSelectUbicaciones(lUbicaciones) {
+            var select = '<select id="slcUbicaciones" style="width:16%; height:1.6em;" ' +
+                'onchange="seleccionarUbicacion()">#options</select>';
+            var options = '<option value="0" ' + (IdUbicacionSeleccionada == 0 ? 'selected' : '') + '>Ubicación</option>';
+            lUbicaciones.forEach(u => {
+                options += '<option value="' + u.id + '"' + (IdUbicacionSeleccionada == u.id ? 'selected' : '') + '>' + u.nombre + '</option>';
+            });
+            select = select.replace("options", options);
+            return select;
+        }
+
+        function getSelectEstados(lEstados) {
+            var select = '<select id="slcEstados" style="width:16%; height:1.6em;" ' +
+                'onchange="seleccionarEstado()">#options</select>';
+            var options = "";
+            lEstados.forEach(e => {
+                options += '<option value="' + e + '"' + (EstadoSeleccionado == e ? 'selected' : '') + '>' + e + '</option>';
+            });
+            select = select.replace("options", options);
+            return select;
+        }
+
+        function seleccionarActividad() {
+            const seleccion = slcActividades.value;
+            IdActividadSeleccionada = seleccion;
+            if (seleccion == 0) {
+                lActividadesSeleccionadas = [];
+                lOpcionesFiltro = lOpcionesFiltro.filter(o => o.tipo != 'actividad');
+            }
+            else {
+                let actividadYaSeleccionada = lActividadesSeleccionadas.find(a => a.id == seleccion);
+                if (!actividadYaSeleccionada) {
+                    lActividadesSeleccionadas.push(seleccion);
+                    const actividad = oData.lActividades.find(a => a.id == seleccion);
+                    lOpcionesFiltro.push({ id: seleccion, tipo: 'actividad', nombre: actividad.nombre })
+                }
+            }
+            renderTagsOpciones();
+        }
+
+        function seleccionarUbicacion() {
+            const seleccion = slcUbicaciones.value;
+            IdUbicacionSeleccionada = seleccion;
+            if (seleccion == 0) {
+                lUbicacionesSeleccionadas = [];
+                lOpcionesFiltro = lOpcionesFiltro.filter(o => o.tipo != 'ubicacion');
+            }
+            else {
+                let ubicacionYaSeleccionada = lUbicacionesSeleccionadas.find(u => u.id == seleccion);
+                if (!ubicacionYaSeleccionada) {
+                    lUbicacionesSeleccionadas.push(seleccion);
+                    const ubicacion = oData.lUbicaciones.find(u => u.id == seleccion);
+                    lOpcionesFiltro.push({ id: seleccion, tipo: 'ubicacion', nombre: ubicacion.nombre })
+                }
+            }
+            renderTagsOpciones();
+        }
+
+        function seleccionarEstado() {
+            const seleccion = slcEstados.value;
+            EstadoSeleccionado = seleccion;
+            if (seleccion == 'Todas') {
+                lEstadosSeleccionados = [];
+                lOpcionesFiltro = lOpcionesFiltro.filter(o => o.tipo != 'estado');
+            }
+            else {
+                let estadoYaSeleccionada = lEstadosSeleccionados.find(e => e == seleccion);
+                if (!estadoYaSeleccionada) {
+                    lEstadosSeleccionados.push(seleccion);
+                    const estado = oData.lEstados.find(e => e == seleccion);
+                    lOpcionesFiltro.push({ tipo: 'estado', nombre: estado })
+                }
+            }
+            renderTagsOpciones();
+        }
+
+        function renderTagsOpciones() {
+            let index = 0;
+            lOpcionesFiltro.forEach(o => {
+                o.index = index;
+                index++;
+            })
+            divTagsOpciones.innerHTML = "";
+            let contenidoHtml = "";
+            lOpcionesFiltro.forEach(o => {
+                contenidoHtml += "<span " +
+                    "class='badge badge-primary' " +
+                    "style='margin: 0.5em; cursor:pointer' " +
+                    "onclick='eliminarOpcion(" + o.index + ")'" +
+                    ">#" + o.nombre + "</span>";
+            })
+            divTagsOpciones.innerHTML = contenidoHtml;
+        }
+
+        function eliminarOpcion(index) {
+            lOpcionesFiltro = lOpcionesFiltro.filter(o => o.index != index);
+            renderTagsOpciones();
+        }
+
+        //#endregion
+
+    </script>
+}

@@ -1,0 +1,311 @@
+﻿@model Gestion.EF.ItemProyecto
+
+<div class="form-group">
+    <div class="row">
+        <div class="col-md-6">
+            <input type="hidden" asp-for="pr.Id" />
+            <form asp-action="_RolAbm">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <label asp-for="pr.Nombre" class="control-label"></label>
+                <input asp-for="pr.Nombre" class="form-control" />
+                <span asp-validation-for="pr.Nombre" class="text-danger"></span>
+            </form>
+        </div>
+        <div class="col-md-3">
+            <label asp-for="pr.Fecha_Inicio" class="control-label"></label>
+            <input id="dtpFechaInicio" asp-for="pr.Fecha_Inicio" type="date" name="partydate" class="form-control">
+            <span asp-validation-for="pr.Fecha_Inicio" class="text-danger"></span>
+        </div>
+        <div class="col-md-3">
+            <label asp-for="pr.Fecha_Fin" class="control-label"></label>
+            <input id="dtpFechaFin" asp-for="pr.Fecha_Fin" type="date" name="partydate" class="form-control">
+            <span asp-validation-for="pr.Fecha_Fin" class="text-danger"></span>
+        </div>
+    </div>
+</div>
+<div class="form-group">
+    <div class="row">
+        <div class="col-md-4">
+            <label asp-for="pr.UsuariosId" class="control-label"></label>
+            @Html.DropDownListFor(model =>
+                model.pr.UsuariosId,
+                new SelectList(Model.Usuarios.Where(u => u.Tipo == "J"), "Id", "ApellidoYNombre")
+                , new { @class = "form-control" }
+            )
+        </div>
+        <div class="col-md-4">
+            <label asp-for="pr.RespSH_UsuarioId" class="control-label"></label>
+            @Html.DropDownListFor(model =>
+                model.pr.RespSH_UsuarioId,
+                new SelectList(Model.Usuarios, "Id", "ApellidoYNombre")
+                , new { @class = "form-control" }
+            )
+        </div>
+        <div class="col-md-2">
+            <label asp-for="pr.Tipo" class="control-label"></label>
+            @Html.DropDownListFor(model =>
+                model.pr.Tipo,
+                new SelectList(Gestion.EF.ValoresUtiles.Get_lTipos_Proyectos())
+                , new { @class = "form-control" }
+            )
+        </div>
+        <div class="col-md-2">
+            <br />
+            <div class="icheck-primary d-inline float-right">
+                <input type="checkbox" id="chbxEjecutado"
+                       @(Model.pr.Estado == Gestion.EF.ValoresUtiles.Estado_Proy_Ejecutado ? "checked= \"checked\"" : "")>
+                <label for="chbxEjecutado">@Gestion.EF.ValoresUtiles.Estado_Proy_Ejecutado</label>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="form-group">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="btn-cerrar btnPro float-right" type="button" data-dismiss="modal">
+                <i class="far fa-times-circle"></i>
+                Cerrar
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="btn-graba btnPro float-right" type="button" onclick="GrabarProyecto()">
+                <i class="fas fa-check"></i>
+                Grabar
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="conten_ABM_Ubicaciones" style="display:none; background-color: aliceblue; padding:5px;width:100%;margin-top:5px">
+    <input id="idUbicacion" type="hidden" />
+    <input id="idProyecto" type="hidden" />
+    <div style="margin-top:15px;" class="row">
+        <div class="col-md-12">
+            <h5><b>Ubicaciones</b></h5>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="form-group">
+                <label class="control-label">Nombre</label>
+                <input Id="Ubicacion_Nombre" class="form-control" />
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="form-group">
+                <label class="control-label"> Descripción </label>
+                <textarea id="Ubicacion_Descripción" class="form-control" rows="2" cols="20"></textarea>
+            </div>
+        </div>
+    </div>
+    <div id="conten_botones_grabaProyecto" class="row">
+        <div class="col-md-2">
+            <div class="btn-graba" type="button" onclick="GrabarProyecto_Ubicaciones()"><i class="fas fa-check"></i> Grabar</div>
+        </div>
+        <div class="col-md-2">
+            <div class="btn-cerrar" type="button" data-dismiss="modal"><i class="far fa-times-circle"></i> Cerrar</div>
+        </div>
+        <div class="col-md-8"></div>
+    </div>
+    <hr />
+    <div class="row">
+        <div class="col-md-12">
+            <div id="grilla_Ubicaciones"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Esto es para la Confirmacion de Elimnacion-->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.19/dist/sweetalert2.min.css">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.19/dist/sweetalert2.all.min.js"></script>
+
+<script>
+
+    //#region INICIALIZAR
+
+    if ($('#dtpFechaInicio').val() == "") {
+
+        //INICIO - ARMADO DE FECHA EN LOS TEXT DEL FILTRO
+        var d = new Date();
+        //console.log('d2',d2);
+
+        var month = d.getMonth() + 1;
+        var day = d.getDate();
+        var year = d.getFullYear();
+
+        if (month < 10)
+            month = '0' + month;
+        if (day < 10)
+            day = '0' + day;
+
+        var mFechaHoy = year + "-" + month + "-" + day;
+
+        var dateControl = document.querySelector('input[id="dtpFechaInicio"]');
+        dateControl.value = mFechaHoy;
+        //FIN - ARMADO DE FECHA EN LOS TEXT DEL FILTRO
+    }
+    abre();
+
+    //#endregion
+
+    //#region FUNCIONES
+
+    function abre() {
+        if ($('#pr_Id').val() > 0) {
+            $('#conten_ABM_Ubicaciones').show();
+            $.get("/Proyecto/getUbicaciones/" + $('#pr_Id').val()).done(function (r) {
+                if (!r.isError) {
+                    grillaUbicaciones(r.data);
+                }
+            });
+        }
+    }
+
+    function GrabarProyecto() {
+        var valid = validaDatos('ProyectoModal');
+        if (!valid.isError) {
+
+
+            if ($('#dtpFechaInicio').val() == '0001-01-01' || $('#dtpFechaInicio').val() == "") {
+                toastr.error("Debe ingresar una fecha inicio", { timeOut: 2000 });
+                return;
+            }
+            if ($('#dtpFechaFin').val() == '0001-01-01' || $('#dtpFechaFin').val() == "") {
+                toastr.error("Debe ingresar una fecha fin", { timeOut: 2000 });
+                return;
+            }
+
+            var model = {
+                Id: $('#pr_Id').val(),
+                Nombre: $('#pr_Nombre').val(),
+                Fecha_Inicio: $('#dtpFechaInicio').val(),
+                Fecha_Fin: $('#dtpFechaFin').val(),
+                UsuariosId: $('#pr_UsuariosId').val(),
+                RespSH_UsuarioId: $('#pr_RespSH_UsuarioId').val(),
+                Tipo: $('#pr_Tipo').val(),
+                Estado: chbxEjecutado.checked ? "@Gestion.EF.ValoresUtiles.Estado_Proy_Ejecutado":"",
+            };
+
+            $.post("/Proyecto/ProyectoGraba", model).done(function (e) {
+                if (!e.isError) {
+                    toastr.success(e.data, { timeOut: 2000 });
+                    //$('#ProyectoModal').modal('hide');
+                    $('.btnPro').hide();
+                    $('#conten_ABM_Ubicaciones').show();
+                    $('#idProyecto').val(e.data1);
+                } else {
+                    toastr.error(e.data, { timeOut: 2000 });
+                }
+            });
+        } else {
+            toastr.error(valid.mensaje, { timeOut: 2000 });
+        }
+    }
+
+    function GrabarProyecto_Ubicaciones() {
+        console.log('Id Proyecto', $('#idProyecto').val());
+        if ($('#idProyecto').val() == '') {
+            $('#idProyecto').val($('#pr_Id').val())
+        }
+
+        if ($('#Ubicacion_Nombre').val()=="") {
+            toastr.error("Existen campos incompletos", { timeOut: 2000 });
+            return;
+        }
+
+        if ($('#pu_Nombre').val() != '') {
+            var model = {
+                Id: $('#idUbicacion').val(),
+                Nombre: $('#Ubicacion_Nombre').val(),
+                Descripción: $('#Ubicacion_Descripción').val(),
+                ProyectoId: $('#idProyecto').val(),
+            };
+
+            $.post("/Proyecto/Proyecto_UbicacionesGraba", model).done(function (e) {
+                if (!e.isError) {
+                    toastr.success(e.data, { timeOut: 2000 });
+                    grillaUbicaciones(e.data1);
+                    $('#Ubicacion_Nombre').val('');
+                    $('#Ubicacion_Descripción').val('')
+                } else {
+                    toastr.error(e.data, { timeOut: 2000 });
+                }
+            });
+        } else {
+            toastr.error(valid.mensaje, { timeOut: 2000 });
+        }
+    }
+
+    function grillaUbicaciones(datos) {
+        $("#grilla_Ubicaciones").html("<div id='Ubicaciones'></div>");
+        $("#Ubicaciones").kendoGrid({
+            dataSource: {
+                data: datos
+            },
+            columns: [
+                { field: "nombre", title: "Nombre" },
+                { field: "descripción", title: "Descripción" },
+                { command: { name: "kedit", text: "", click: EditUbicacion }, title: "Editar", width: "65px", attributes: { style: "text-align:center;" } },
+                { command: { name: "kdelete", text: "", click: EliminarUbicacion }, title: "Editar", width: "65px", attributes: { style: "text-align:center;" } }
+            ]
+        });
+    }
+
+    function EditUbicacion(e) {
+        var d = this.dataItem($(e.currentTarget).closest("tr"));
+        $('#idUbicacion').val(d.id);
+        $('#Ubicacion_Nombre').val(d.nombre);
+        $('#Ubicacion_Descripción').val(d.descripción);
+        $('#idProyecto').val(d.proyectoId);
+    }
+
+
+    //
+    //Funcion para eliminar un Registro de la grilla
+    //
+   async function EliminarUbicacion(e) {
+        var d = this.dataItem($(e.currentTarget).closest("tr"));
+            try {
+                const result = await Swal.fire({
+                    html: '¿Estás seguro que desea eliminar la ubicacion?<br><br>',
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonText: 'Aceptar',
+                    cancelButtonText: 'Cancelar',
+                    customClass: {
+                        cancelButton: 'btn btn-secondary',
+                        confirmButton: 'btn btn-primary'
+                    }
+                });
+
+                if (!result.isConfirmed) {
+                    toastr.error("No se realizó ninguna modificación.", { timeOut: 2000 });
+                    return;
+                }
+            } catch (error) {
+                console.error("Error para mostrar mensaje de confirmacion", error);
+                return;
+            }
+
+        var model = { IdUbicacion: d.id }
+        $.post("/Proyecto/ControlyEliminacionUbicacion", model).done(function (e) {
+            if (!e.isError) {
+                 toastr.success(e.data, { timeOut: 2000 });
+                //si lo eliminamos, traemos la nueva data.
+                grillaUbicaciones(e.data3)
+
+            } else {
+                toastr.error(e.data2, { timeOut: 2000 });
+                abre();
+            }
+        });
+
+
+    }
+
+
+ //#endregion
+
+</script>
+

@@ -1,0 +1,353 @@
+﻿@*@model IEnumerable<Gestion.Web.Models.Res_PPA>*@
+@model Gestion.Web.Models.Res_PlanificacionProyectoActividades_Grilla
+
+
+
+<br />
+
+<div style="padding:10px;">
+    <div class="row">
+        <div class="col-md-9">
+            <div class="form-group">
+                <h5>Filtro de Actividades</h5>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="form-group">
+                <h5>Ordenamiento</h5>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-9">
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label class="control-label">Ubicacion</label>
+                        <div id="Conten_FiltroUbicaciones"></div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label class="control-label">Rubro</label>
+                        <div id="Conten_FiltroRubro"></div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label class="control-label">Actividad</label>
+                        <div id="Conten_FiltroActividad"></div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label class="control-label">Contratista</label>
+                        <div id="Conten_FiltroContratista"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <label class="control-label">Ordenado Por:</label>
+                        <div id="Conten_FiltroOrden"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div id="GrillaKendo"></div>
+
+
+
+<script>
+    // JSON stringify serialization y limpieza
+    JSON.stringify = JSON.stringify || function (obj) {
+        var t = typeof (obj);
+        if (t != "object" || obj === null) {
+            // simple data type
+            if (t == "string") obj = '"' + obj + '"';
+            return String(obj);
+        }
+        else {
+            // recurse array or object
+            var n, v, json = [], arr = (obj && obj.constructor == Array);
+            for (n in obj) {
+                v = obj[n]; t = typeof (v);
+                if (t == "string") v = '"' + v + '"';
+                else if (t == "object" && v !== null) v = JSON.stringify(v);
+                json.push((arr ? "" : '"' + n + '":') + String(v));
+            }
+            var rawString = (arr ? "[" : "{") + String(json) + (arr ? "]" : "}");
+            return rawString;
+        }
+    };
+    function escape(key, val) {
+        if (typeof (val) != "string") return val;
+
+        var replaced = val
+        return replaced;
+    }
+
+    JSON.stringifyEscaped = function (obj) {
+        return JSON.stringify(obj, escape);
+    }
+    var data = JSON.parse(JSON.stringifyEscaped(@Html.Raw(Json.Serialize(Model))));
+
+    let lstListGeneral = data.lResPPAs;
+
+    function CargoFiltros(data) {
+        cargaUbicaciones_Filtro(data.lstDistinctUbicacion);
+        cargaRubros_Filtro(data.lstDistinctRubro);
+        cargaActividades_Filtro(data.lstDistinctActividades);
+        cargaContratistas_Filtro(data.lstDistinctContratistas);
+        cargaOrden_Filtro(data.lstOrden);
+        Filtro(1);
+    };
+
+    function grilla(datos) {
+    $("#GrillaKendo").html("<div id='grillaProyecto_Actividades'></div>");
+
+
+    //DEFINICION DE COLUMNAS DE LA GRILLA
+        var colGrilla = [];
+        colGrilla.push({ field: "id", title: "ID" });
+        colGrilla.push({ field: "proyecto_UbicacionesNombre", title: "Ubicación", media: "(min-width: 250px)" });
+        colGrilla.push({ field: "planificacion_Actividades_RubroNombre", title: "Rubro", media: "(min-width: 450px)" });
+        colGrilla.push({ field: "planificacion_ActividadesNombre", title: "Actividades", media: "(min-width: 450px)" });
+        colGrilla.push({ field: "contratistasNombre", title: "Contratista", media: "(min-width: 450px)" });
+        colGrilla.push({ field: "fecha_Est_Incio", title: "Inicio Est",  media: "(min-width: 450px)" });
+        colGrilla.push({ field: "fecha_Est_Fin", title: "Fin Est",  media: "(min-width: 450px)" });
+        colGrilla.push({ field: "detalle", title: "Comentario" });
+        /*colGrilla.push({ field: "incidencia", title: "Incidencia" }); Lo saco por que no se usa*/
+        colGrilla.push({ title: "Cantidad", template: "# if(unidadMedida != null) {# ${cantidad} ${unidadMedida}#} #" });
+        colGrilla.push({ field: "asignadoNP", title: "Asignado NP", media: "(min-width: 450px)" });
+        colGrilla.push({ field: "disponibleCantidad", title: "Disponible S/ Asignar", media: "(min-width: 450px)", attributes: { style: "text-align:center;" } });
+        var btnVer = "<button type='button' class='btn btn-secondary btn-xs' onclick='verPadre(#:data.id#)'>" +
+            "<i class='fa fa-info-circle'></i></button>";
+        colGrilla.push({ title: "Precedente", template: "# if(tienePadre == 'Si') {# " + btnVer + " #} else {# No #} #" });
+        colGrilla.push({ command: { name: "kview", text: "", click: VerNP }, title: "Nota Pedido", width: "65px", attributes: { style: "text-align:center;" } });
+        colGrilla.push({ command: { name: "kedit", text: "", click: Editar }, title: "Editar", width: "65px", attributes: { style: "text-align:center;" } });
+        //colGrilla.push({ command: { name: "kview", text: "", click: copiarActividad }, title: "Editar", width: "65px", attributes: { style: "text-align:center;" } });
+    $("#grillaProyecto_Actividades").kendoGrid({
+        filterable: true,
+        sortable: true,
+        groupable: true,
+        reorderable: true,
+        columnMenu: true,
+        toolbar: ["excel"],
+        excel: {
+            fileName: "Actividades_Proyecto.xlsx",
+            allPages: true,
+            filterable: true
+        },
+        dataSource: {
+            data: datos
+        },
+        //detailInit: actividadeslog,
+        columns: colGrilla,
+                dataBound: function () {
+                    dataView = this.dataSource.view();
+
+                    for (var i = 0; i < dataView.length; i++) {
+                        if (dataView[i].finalizados) {
+                            var uid = dataView[i].uid;
+                            $("#grillaProyecto_Actividades tbody").find("tr[data-uid=" + uid + "]").find(".k-grid-kedit").hide();
+                        }
+                        if (dataView[i].finalizados) {
+                            var uid = dataView[i].uid;
+                            $("#grillaProyecto_Actividades tbody").find("tr[data-uid=" + uid + "]").addClass("K-bacgraundRow_V");
+
+                        }
+                        if (dataView[i].ocultarNP) {
+                            var uid = dataView[i].uid;
+                            $("#grillaProyecto_Actividades tbody").find("tr[data-uid=" + uid + "]").find(".k-grid-kview").hide();
+
+                        }
+
+                    }
+
+                }
+        });
+    }
+
+    function cargaOrden_Filtro(data) {
+
+        var d = '<select id="OrdenFiltro" class="form-control" onchange="Filtro(0);" style="font-size:12px">';
+        d = d + '<option value="0">Ordenado por:</option>';
+        for (var i = 0; i < data.length; i++) {
+            d = d + '<option value="' + data[i] + '">' + data[i] + '</option>';
+        }
+        d = d + '</select>';
+        $('#Conten_FiltroOrden').html(d);
+        
+    }
+
+    function cargaUbicaciones_Filtro(data) {
+        
+        var d = '<select id="UbicacionesFiltro" class="form-control" onchange="Filtro(0);" style="font-size:12px">';
+        d = d + '<option value="0">Seleccione una Ubicacion</option>';
+        for (var i = 0; i < data.length; i++) {
+            d = d + '<option value="' + data[i] + '">' + data[i] + '</option>';
+        }
+        d = d + '</select>';
+        $('#Conten_FiltroUbicaciones').html(d);
+    }
+
+    function cargaActividades_Filtro(data) {
+        
+        var d = '<select id="ActividadesFiltro" class="form-control" onchange="Filtro(0);" style="font-size:12px">';
+        d = d + '<option value="0">Seleccione una Actividad</option>';
+        for (var i = 0; i < data.length; i++) {
+            d = d + '<option value="' + data[i] + '">' + data[i] + '</option>';
+        }
+        d = d + '</select>';
+
+        $('#Conten_FiltroActividad').html(d);
+    }
+    function cargaContratistas_Filtro(data) {
+        var d = '<select id="ContratistasFiltro" class="form-control" onchange="Filtro(0);" style="font-size:12px">';
+        d = d + '<option value="0">Seleccione un Contratista</option>';
+        for (var i = 0; i < data.length; i++) {
+            d = d + '<option value="' + data[i] + '">' + data[i] + '</option>';
+        }
+        d = d + '</select>';
+
+        $('#Conten_FiltroContratista').html(d);
+
+    }
+
+    function cargaRubros_Filtro(data) {
+        var d = '<select id="RubrosFiltro" class="form-control" onchange="Filtro(0);" style="font-size:12px">';
+        d = d + '<option value="0">Seleccione un Rubro</option>';
+        for (var i = 0; i < data.length; i++) {
+            d = d + '<option value="' + data[i] + '">' + data[i] + '</option>';
+        }
+        d = d + '</select>';
+        $('#Conten_FiltroRubro').html(d);
+    }
+
+    function Filtro(id) {
+
+        var selectedValueUbicaciones = "";
+        var selectedValueContratista = "";
+        var selectedValueActividades = "";
+        var selectedValueRubros = "";
+        var selectedValueOrden = "";
+
+        //Verifico si viene desde una carga general de la pagina, o de un evento propio del control del combo
+        if (id == 1) {
+            //Es desde la recarga de la pantalla entonces tomo los valores del LOCALSTORAGE
+            var mFiltros = JSON.parse(localStorage.getItem('Filtros_Proyecto_ActividadesGrilla'));
+            if (mFiltros != null) {
+                
+                selectedValueUbicaciones = mFiltros.selectedValueUbicaciones;
+                selectedValueContratista = mFiltros.selectedValueContratista;
+                selectedValueActividades = mFiltros.selectedValueActividades;
+                selectedValueRubros = mFiltros.selectedValueRubros;
+                selectedValueOrden = mFiltros.selectedValueOrden;
+            }
+            else {
+                
+                selectedValueUbicaciones = "0";
+                selectedValueContratista = "0";
+                selectedValueActividades = "0";
+                selectedValueRubros = "0";
+                selectedValueOrden = "0";
+            }
+            $('#RubrosFiltro').val(selectedValueRubros + "");
+            $('#ContratistasFiltro').val(selectedValueContratista + "");
+            $('#ActividadesFiltro').val(selectedValueActividades + "");
+            $('#UbicacionesFiltro').val(selectedValueUbicaciones + "");
+            $('#OrdenFiltro').val(selectedValueOrden + "");
+
+        }
+        else {
+            //Es desde el evento del control, entonces tomo el valor nuevo del control
+            selectedValueUbicaciones = UbicacionesFiltro.options[UbicacionesFiltro.selectedIndex].value;
+            selectedValueContratista = ContratistasFiltro.options[ContratistasFiltro.selectedIndex].value;
+            selectedValueActividades = ActividadesFiltro.options[ActividadesFiltro.selectedIndex].value;
+            selectedValueRubros = RubrosFiltro.options[RubrosFiltro.selectedIndex].value;
+            selectedValueOrden = OrdenFiltro.options[OrdenFiltro.selectedIndex].value;
+        }
+        
+        var lstData = lstListGeneral;
+
+       //setTimeout(() => {
+            //    console.log("Retrasado por 1 segundo.");
+            //}, "900");
+
+        if (selectedValueUbicaciones != "0") {
+            
+     
+            lstData = lstData.filter(x => x.proyecto_UbicacionesNombre == selectedValueUbicaciones);
+        }
+       
+        if (selectedValueContratista != "0") {
+            lstData = lstData.filter(x => x.contratistasNombre == selectedValueContratista);
+        }
+       
+        if (selectedValueActividades != "0") {
+            lstData = lstData.filter(x => x.planificacion_ActividadesNombre == selectedValueActividades);
+        }
+       
+        if (selectedValueRubros != "0") {
+            lstData = lstData.filter(x => x.planificacion_Actividades_RubroNombre == selectedValueRubros);
+        }
+       
+        if (selectedValueOrden != "0") {
+            
+            if (selectedValueOrden == "Rubro") {
+
+                //lstData = lstData.sort(x => x.planificacion_Actividades_RubroNombre);
+                lstData = lstData.sort(function (a, b) {
+                    if (a.planificacion_Actividades_RubroNombre < b.planificacion_Actividades_RubroNombre) return -1;
+                    if (b.planificacion_Actividades_RubroNombre < a.planificacion_Actividades_RubroNombre) return 1;
+                    return 0;
+                });
+            }
+            if (selectedValueOrden == "Ubicacion") {
+
+                //lstData = lstData.sort(x => x.proyecto_UbicacionesNombre);
+                lstData = lstData.sort(function (a, b) {
+                    if (a.proyecto_UbicacionesNombre < b.proyecto_UbicacionesNombre) return -1;
+                    if (b.proyecto_UbicacionesNombre < a.proyecto_UbicacionesNombre) return 1;
+                    return 0;
+                });
+            }
+            if (selectedValueOrden == "Actividad") {
+
+                //lstData = lstData.sort(x => x.planificacion_ActividadesNombre);
+
+                lstData = lstData.sort(function (a, b) {
+                    if (a.planificacion_ActividadesNombre < b.planificacion_ActividadesNombre) return -1;
+                    if (b.planificacion_ActividadesNombre < a.planificacion_ActividadesNombre) return 1;
+                        return 0;
+                    });
+            }
+        }
+        else {
+
+            //Orden por defecto
+        }
+
+        var estadoFiltroPA = { selectedValueUbicaciones: selectedValueUbicaciones, selectedValueContratista: selectedValueContratista, selectedValueActividades: selectedValueActividades, selectedValueRubros: selectedValueRubros, selectedValueOrden: selectedValueOrden};
+       // localStorage.setItem('Filtros_Proyecto_ActividadesGrilla', JSON.stringify(estadoFiltroPA));
+
+        grilla(lstData);
+
+    }
+
+   
+    //grilla(data.lResPPAs);
+    CargoFiltros(data);
+
+
+    
+
+</script>

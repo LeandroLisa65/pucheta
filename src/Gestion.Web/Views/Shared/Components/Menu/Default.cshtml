@@ -1,0 +1,77 @@
+﻿@model Gestion.EF.ItemMenuBarra
+
+<div class="sidebar ">
+    <div class="user-panel mt-3 pb-3 mb-3 d-flex">
+        <div class="image">
+            <img id="gAvatar" src="~/dist/avatar/@Model.Avatar" class="img-circle elevation-2" alt="User Image">
+        </div>
+        <div class="info">
+            <a href="/Gestion/Perfil" class="d-block">@Model.NombreApellido</a>           
+            <input type="hidden" value="@Model.IdUsuario" id="IdUsuario" />
+        </div>
+    </div>
+
+    <div id="menu" style="min-height:300px;">
+        <nav class="mt-2">
+            <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+
+                @foreach (var item in Model.Menu)
+                {
+
+                    @if (item.menu_h.Count > 0)
+                    {
+
+                        <li class='nav-item has-treeview @item.menu.Activo'>
+                            <a href='#' class='nav-link'>
+                                <i class='@item.menu.Icon'></i>
+                                <p> @item.menu.Nombre <i class='right fas fa-angle-left'></i></p>
+                            </a>
+                            <ul class='nav nav-treeview'>
+
+                                @foreach (var itemH in item.menu_h)
+                                {
+
+                                    <li class='nav-item'>
+                                        <a href='@itemH.Path' class='nav-link @itemH.Activo'>
+                                            <i class='@itemH.Icon'></i>
+                                            <p>@itemH.Nombre</p>
+                                        </a>
+                                    </li>
+
+                                }
+
+                            </ul>
+
+                        </li>
+
+                    }
+                    else
+                    {
+
+                        <li class='nav-item'>
+                            <a href='@item.menu.Path' class='nav-link @item.menu.Activo'>
+                                <i class='@item.menu.Icon'></i>
+                                <p>@item.menu.Nombre</p>
+                            </a>
+                        </li>
+
+                    }
+
+                }
+
+
+                
+
+            </ul>
+        </nav>
+
+    </div>
+</div>
+<div class="tramaBackMenu">
+   
+    <div style="width:100%; position: relative; text-align:center;">
+        <br /><br /><br /><br /><br />
+        <div style="font-size:12px; color:#090248" hidden> IP : @Model.IP</div>
+    </div>
+</div>
+

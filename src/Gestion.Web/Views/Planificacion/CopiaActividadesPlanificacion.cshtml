@@ -1,0 +1,222 @@
+﻿@model Gestion.EF.ItemActividadPlanificacionCopiaActividad
+
+
+
+<div class="card-body">
+    <input type="hidden" asp-for="IdPlanificacionProyectoActividad" />
+    <div class="row">
+            
+        @*<div class="col-4">
+            <div class="col-md-12">
+                <div class="form-group">
+                    <label asp-for="actividadesSeleccionada" class="control-label">Actividades:</label>
+                    @Html.DropDownListFor(model =>
+                    model.actividadesSeleccionada,
+                    new SelectList(Model.ListaActividades, "Id", "Nombre")
+                    , new { @class = "form-control" }
+                    )
+                </div>
+            </div>
+        </div>*@
+        <div class="col-4">
+            <div class="form-group">
+                <label class="control-label">Actividad:</label>
+                <input type="text" id="dtpActividad" class="form-control" disabled/>
+            </div>
+        </div>
+        <div class="col-4">
+            <div class="form-group">
+                <label class="control-label">Ubicacion Origen:</label>
+                <input type="text" id="dtpUbicacionOrigen" class="form-control" disabled/>
+            </div>
+        </div>
+        <div class="col-4">
+            <div class="form-group">
+                <label class="control-label">Comentario:</label>
+                <input type="text" id="dtpComentario" class="form-control" disabled/>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-4">
+            <div class="form-group">
+                <label class="control-label">Ubicaciones:</label>
+                @foreach (var ubicacion in Model.Proyecto_Ubicaciones)
+                {
+                    <div>
+                        <input type="checkbox" id="ubicacion_@ubicacion.Id" name="ubicacionesSeleccionadas" value="@ubicacion.Id" />
+                        <label for="ubicacion_@ubicacion.Id">@ubicacion.Nombre</label>
+                    </div>
+                }
+            </div>
+        </div>
+        @*
+           --- ESTE ES CON SELECCION MULTIPLE    ---
+        <div class="col-md-4">
+             <div class="form-group">
+                <label for="pIdUbicacionActividad" class="control-label">Ubicaciones:</label>
+                <select id="pIdUbicacionActividad" name="pIdUbicacionActividad" class="form-control" multiple>
+                    @foreach (var ubicacion in Model.Proyecto_Ubicaciones)
+                    {
+                        <option value="@ubicacion.Id">@ubicacion.Nombre</option>
+
+                    }
+                </select>
+            </div>
+        </div>*@
+       
+       @*
+       ----- ESTE ES COMBO NORMAL.    ------
+       <div class="col-md-3">     
+            <div class="form-group">
+                <label asp-for="pIdUbicacionActividad" class="control-label">Ubicaciones:</label>
+                @Html.DropDownListFor(model =>
+                model.pIdUbicacionActividad,
+                new SelectList(Model.Proyecto_Ubicaciones, "Id", "Nombre")
+                , new { @class = "form-control" }
+                )
+            </div>
+        </div>*@
+        <div class="col-md-3">
+            <div class="form-group">
+                <label class="control-label">Fecha Inicio:</label>
+                <input type="date" id="dtpFechaInicioCopiar" class="form-control" />
+                
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="form-group">
+                <label class="control-label">Fecha Fin:</label>
+                <input type="date" id="dtpFechaFinCopiar" class="form-control" />
+            </div>
+        </div>
+    </div>
+
+
+<div class="row">
+    <div class="col-md-4"></div>
+    <div class="col-md-2">
+        <button class="btn-graba" id="" type="button" onclick="GrabarCopiaPlanificacion()"><i class="fas fa-check"></i> Grabar </button>
+    </div>
+    <div class="col-md-2">
+        <button class="btn-cerrar" id="" type="button" data-dismiss="modal"><i class="far fa-times-circle"></i> Cerrar</button>
+    </div>
+    <div class="col-md-4"></div>
+
+    <br />
+
+</div>
+</div>
+<script>
+
+    var dataGlobalCopiarPlanificacion = JSON.parse('@Html.Raw(Json.Serialize(Model))');
+    console.log(dataGlobalCopiarPlanificacion);
+    var IdProyectoCopiaPlanificacion = dataGlobalCopiarPlanificacion.data;
+
+
+
+
+    $('#dtpActividad').attr('disabled', true);
+    $('#dtpUbicacionOrigen').attr('disabled', true);
+    $('#dtpComentario').attr('disabled', true);
+
+    $('#dtpActividad').val(dataGlobalCopiarPlanificacion.vis_NombreActividad);
+    $('#dtpUbicacionOrigen').val(dataGlobalCopiarPlanificacion.vis_NombreUbicacion);
+    if (dataGlobalCopiarPlanificacion.vis_Detalle != null) {
+        $('#dtpComentario').val(dataGlobalCopiarPlanificacion.vis_Detalle);
+    }else{
+        $('#dtpComentario').val("");
+    }
+
+    //FECHA FIN
+    var inputFechaFin = document.getElementById("dtpFechaFinCopiar");
+    // Valor de fecha en formato "dd/MM/yyyy"
+    var vis_FechaFin = (dataGlobalCopiarPlanificacion.vis_FechaHasta).toString();
+    // Convertir la fecha al formato de JavaScript (yyyy-MM-dd)
+    var fechaParts_fin = vis_FechaFin.split("/");
+    var fechaFormateada_fin = fechaParts_fin[2] + "-" + fechaParts_fin[1] + "-" + fechaParts_fin[0];
+    inputFechaFin.value = fechaFormateada_fin;
+
+    //FECHA INICIO
+    var inputFechaInicio = document.getElementById("dtpFechaInicioCopiar");
+    // Valor de fecha en formato "dd/MM/yyyy"
+    var vis_FechaInicio = (dataGlobalCopiarPlanificacion.vis_FechaInicio).toString();
+    // Convertir la fecha al formato de JavaScript (yyyy-MM-dd)
+    var fechaParts_inicio = vis_FechaInicio.split("/");
+    var fechaFormateada_inicio = fechaParts_inicio[2] + "-" + fechaParts_inicio[1] + "-" + fechaParts_inicio[0];
+    inputFechaInicio.value=fechaFormateada_inicio;
+
+    //
+    //LLAMADAS:
+    //
+    ComboActividadesPlanificacion_Copiar(IdProyectoCopiaPlanificacion);
+
+    //
+    // Funcion que se encarga de buscar el listado de Actividades para este Proyecto
+    //
+    function ComboActividadesPlanificacion_Copiar(IdProyectoParam = 0) {
+        $.post("/Planificacion/cargarComboActividadPlanificacion",
+            { IdProyecto: IdProyectoParam })
+            .done(function (e) {
+                if (!e.isError) {
+                    data = e.data;
+                    $("#ActividadesComboPlanif").kendoDropDownList({
+                        filter: "contains",
+                        dataTextField: "nombre",
+                        dataValueField: "id",
+                        optionLabel: "Elegir Actividades",
+                        dataSource: data.data1,
+                        height: 400
+                    });
+
+                } else {
+                    toastr.error(e.data, { timeOut: 2000 });
+                }
+            });
+    }
+
+    //
+    //Creamos la Actividad Nueva
+    //
+    function GrabarCopiaPlanificacion() {  
+        //Buscamos los valores seleccionados
+        var checkboxes = document.querySelectorAll('.form-group input[type="checkbox"]');
+        var valoresSeleccionados = [];
+        for (var i = 0; i < checkboxes.length; i++) {
+            if (checkboxes[i].checked) {
+                if (checkboxes[i].value != "on") {
+                    valoresSeleccionados.push(checkboxes[i].value);
+                }     
+            }
+        }
+
+        if (valoresSeleccionados.length == 0) {
+            toastr.error("No se seleccionó ninguna ubicación.", { timeOut: 2000 });
+            return;
+        }
+
+        if ($('#dtpFechaFinCopiar').val() == "" || $('#dtpFechaInicioCopiar').val() == "") {
+            toastr.error("No se ingreso la fecha.", { timeOut: 2000 });
+            return;
+        }
+       
+        var model = {
+            IdPlanificacionProyectoActividad: $('#IdPlanificacionProyectoActividad').val(),
+            Proyecto_UbicacionesId: valoresSeleccionados,
+            Planificacion_ActividadesId: dataGlobalCopiarPlanificacion.actividadesSeleccionada,
+            Fecha_Est_Incio: $('#dtpFechaInicioCopiar').val(),
+            Fecha_Est_Fin: $('#dtpFechaFinCopiar').val()
+        };
+
+        $.post("/Planificacion/CopiarPlanificacionActividad", model).done(
+            function (e) {
+                if (!e.isError) {                
+                    toastr.success("Se realizó la Operación exitosamente.", { timeOut: 2000 });
+                    cargaProyecto_ActividadesGrilla();
+                    $('#divMdlArchivos2').modal('hide');
+                } else {
+                    toastr.error(e.data, { timeOut: 2000 });
+                }
+            });
+    }
+</script>
