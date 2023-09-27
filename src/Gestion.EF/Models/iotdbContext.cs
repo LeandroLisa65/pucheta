@@ -101,8 +101,6 @@ namespace Gestion.EF.Models
         {
             if (!optionsBuilder.IsConfigured)
             { 
-                System.Console.WriteLine("CADENA DE CONEXION");
-                System.Console.WriteLine(connectionString);
                 var dbConnection = new MySqlConnection(connectionString);
                 optionsBuilder.UseMySql(dbConnection, ServerVersion.AutoDetect(connectionString));
                 //optionsBuilder.UseMySql("server=127.0.0.1; User Id=root; pwd=Laliho*65; database=pucheta; Persist Security Info=True");
