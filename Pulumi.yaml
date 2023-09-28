@@ -1,0 +1,4 @@
+name: pucheta
+runtime: dotnet
+main: infra
+description: Infraestructura de Pucheta Construcciones

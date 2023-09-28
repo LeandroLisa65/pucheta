@@ -1,0 +1,49 @@
+﻿@model IEnumerable<Gestion.EF.Models.Menus>
+
+<div class="row">
+    <div class="col-md-6"> <h6 class="card-title">Listado de Menu</h6></div>
+    <div class="col-md-6"><button class="btn btn-primary" id="btn_Nuevo" onclick="Nuevo()"><i class="far fa-edit"></i> Agregar Menú</button></div>
+</div>
+
+<br />
+<div id="GrillaKendo"></div>
+
+
+<script>
+
+    function grilla(datos) {
+    
+    $("#GrillaKendo").html("<div id='grillaMenu'></div>");
+
+    $("#grillaMenu").kendoGrid({
+        filterable: true,
+        sortable: true,
+        dataSource: {
+            data: datos
+        },
+        columns: [
+
+            { field: "id", title: "Id", width: "70px" },
+            { field: "idMenuPadre", title: "Idp", width: "80px" },
+            { field: "orden", title: "Orden", width: "100px" },
+            { field: "nombre", title: "Nombre" },
+            { field: "path", title: "Path" },
+            
+            { template: '<i class="${icon}"></i>', title: "Icon", width: "60px", attributes: { style: "text-align:center;" } },
+            { title: "estado", template: '# if (activo) {#<img src="../dist/img/checkbox.png" />#} else {#<img src="../dist/img/uncheckbox.png" />#}#', width: "80px", attributes: { style: "text-align:center;" } },
+            
+            { command: { name: "kedit", text:"", click: Editar }, title: "Editar", width: "65px" , attributes: { style: "text-align:center;" } }
+            
+        ]
+
+    });
+}
+    
+    var data = JSON.parse('@Html.Raw(Json.Serialize(Model))');
+    
+    grilla(data);
+
+
+</script>
+
+

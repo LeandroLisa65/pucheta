@@ -1,0 +1,63 @@
+﻿@model object
+@{
+    ViewData["Title"] = "Estadísticas";
+    Layout = "~/Views/Shared/_LayoutGestion.cshtml";
+}
+
+<div class="row animate__animated animate__fadeIn">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <strong>Compras</strong>
+                </h3>
+            </div>
+            <div class="card-body">
+
+            </div>
+        </div>
+    </div>
+    <div id="divEstadisticasIncidentes" class="col-md-6"></div>
+    <div id="divEstadisticasCertificados" class="col-md-12"></div>
+</div>
+
+<div id="divMdlDetalle" class="modal fade" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 id="hdrTituloModal" class="modal-title"></h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div id="divDetalle" class="col-md-12"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal" aria-label="Close">
+                    <i class="fas fa-arrow-left"></i>
+                    Volver
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts  {
+    <script>
+        const oResult = JSON.parse('@Html.Raw(Json.Serialize(Model))');
+        function inicializar() {
+            $.get("@Url.Action("_EstadisticasIncidentes", "Estadisticas")",
+                function (data) {
+                    $('#divEstadisticasIncidentes').html(data);
+                });
+            $.get("@Url.Action("_EstadisticasCertificados", "Estadisticas")",
+                function (data) {
+                    $('#divEstadisticasCertificados').html(data);
+                });
+        }
+        inicializar();
+    </script>
+}

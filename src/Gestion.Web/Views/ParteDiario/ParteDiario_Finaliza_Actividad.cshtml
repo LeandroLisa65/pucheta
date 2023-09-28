@@ -1,0 +1,136 @@
+﻿@model Gestion.Web.Models.Res_ParteDiario_ActividadFinaliza
+
+<div class="row">
+    <input type="hidden" id="ProyectoId_Finaliza" />
+    <input type="hidden" id="IdParteDiario_Finaliza" />
+    <input type="hidden" id="IdPlanificacionActividades_Finaliza" />
+    <input type="hidden" id="Planificacion_Proyecto_ActividadId_Finaliza" />
+    <input type="hidden" id="ParteDiario_ActividadesId_Finaliza" />
+    <div class="col-md-6 ">
+        Rubro : <b><span id="sRubro_Finaliza"></span></b> <br />
+        Actividad : <b><span id="sActividad_Finaliza"></span></b> <br />
+        Ubicación <b><span id="sUbicacion_Finaliza"></span></b><br />
+        Avance: <b><span id="sAvance_Finaliza"></span></b>
+    </div>
+    <div class="col-md-6 ">
+        Inicio Estimado : <b><span id="fechaIncio_Finaliza"></span></b> <br />
+        Fin Estimado : <b><span id="fechaFin_Finaliza"></span></b> <br />
+        Inicio Real: <b><span id="fecha_Creacion_Finaliza"></span></b><br />
+        Comentario: <b><span id="sDetalle_Finaliza"></span></b>
+    </div>
+</div>
+<hr />
+
+<div id="Conten-Calidad" class="row" style="padding:8px; background-color: aliceblue;">
+    <div class="col-md-12">
+        <h5><b>Revision Items Calidad</b></h5>
+        <hr />
+    </div>
+    @if (Model.MostarItemCalidad == true)
+    {
+        @foreach (var item in Model.lstItemCalidad)
+        {
+            <div class="col-md-12">
+                <label style="font-size:16px">@Html.DisplayFor(m => item.DetalleCompletoTareaCalidad)</label>
+            </div>
+            <div class="col-md-3">
+                <label class="control-label" style="text-decoration:underline">TAREA:</label><br />
+                <label class="control-label">@item.DetalleTareaCalidad</label><br />
+            </div>
+            <div class="col-md-3">
+                <label class="control-label" style="text-decoration:underline">VERIFICACION</label>
+                <select id="ddlFinaliza_@item.IdCalidad_Items" class="form-control" style="width:100%">
+                    <option value="0" selected>Sel. Opcion</option>
+                    <option value="S">Aprobado</option>'
+                    <option value="N">No Aprobado</option>'
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label class="control-label" style="text-decoration:underline">COMENTARIO:</label>
+                <input class="form-control" style="width:100%" id="txtFinaliza_@item.IdCalidad_Items" maxlength="255" />
+            </div>
+            <div class="col-md-12">
+                <hr class="linea">
+            </div>
+        }
+    }
+    else
+    {
+        <div class="col-md-12">
+            <hr class="linea">
+        </div>
+        <div class="col-md-12">
+            <label class="control-label" style="font-size:14px">Esta Actividad no posee item de calidad relacionados. Si en necesario crear un Item de Calidad para esta actividad por vor agrege su comentario a continuacion y sera enviado al Area correspondiente</label><br />
+        </div>
+        <div class="col-md-12">
+            <textarea rows="3" class="form-control" style="width:100%" id="txtComentario_CrearItem" maxlength="255" />
+        </div>
+        <div class="col-md-12">
+            <hr class="linea">
+        </div>
+
+    }
+</div>
+<br />
+<div class="row">
+    <div id="btn_graba" class="col-md-6">
+        <div class="btn-graba" style="width:200px" type="button" onclick="FinalizarActividad()"><i class="fas fa-check"></i> Finalizar Actividad</div>
+    </div>
+    <div class="col-md-6">
+        <div class="btn-cerrar" type="button" data-dismiss="modal"><i class="far fa-times-circle"></i> Cerrar</div>
+    </div>
+</div>
+
+<script>
+    var data = JSON.parse('@Html.Raw(Json.Serialize(Model))');
+    $('#ProyectoId_Finaliza').val(data.proyectoId);
+    $('#IdPlanificacionActividades_Finaliza').val(data.idPlanificacionActividades);
+    $('#Planificacion_Proyecto_ActividadId_Finaliza').val(data.planificacion_Proyecto_ActividadId);
+    $('#ParteDiario_ActividadesId_Finaliza').val(data.parteDiario_ActividadesId);
+
+    function FinalizarActividad() {
+
+        if ($('#ParteDiario_ActividadesId_Finaliza').val() != '0') {
+
+            var lstItemCalidadAux = [];
+            console.log("lstItemCalidadAux Inicial", lstItemCalidadAux);
+            $("[id^=ddlFinaliza_]").each(function (index) {
+                var idA = this.id.split("_");
+                console.log("idA[1]).val()", idA[1]),
+                lstItemCalidadAux.push({
+                    valor: this.value,
+                    descripcion: $('#txtFinaliza_' + idA[1]).val(),
+                    IdCalidad_Items: idA[1]
+                });
+            });
+
+            console.log("lstItemCalidadAux", lstItemCalidadAux);
+            //Envio los registros para Grabar
+            // Con el el formato Res_ParteDiario_ActividadFinaliza
+            var model = {
+                ProyectoId: $('#ProyectoId_Finaliza').val(),
+                IdParteDiario: $('#IdParteDiario_Finaliza').val(),
+                IdPlanificacionActividades: $('#IdPlanificacionActividades_Finaliza').val(),
+                Planificacion_Proyecto_ActividadId: $('#Planificacion_Proyecto_ActividadId_Finaliza').val(),
+                ParteDiario_ActividadesId: $('#ParteDiario_ActividadesId_Finaliza').val(),
+                MostarItemCalidad: data.mostarItemCalidad,
+                lstItemCalidad: lstItemCalidadAux,
+                CrearItemCalidad: $('#txtComentario_CrearItem').val(),
+            };
+            $.post("/ParteDiario/ActividadesFinaliza", model).done(function (e) {
+
+                if (!e.isError) {
+                    toastr.success(e.data, { timeOut: 2000 });
+                    $('#ParteDiario_Finalizar_ActividadModal').modal('hide');
+                    ValidaParteDiario();
+                } else {
+                    toastr.error(e.data, { timeOut: 2000 });
+                }
+            });
+
+        } else {
+            toastr.error('Seleccione un Contratista', { timeOut: 2000 });
+        }
+    }
+</script>
+

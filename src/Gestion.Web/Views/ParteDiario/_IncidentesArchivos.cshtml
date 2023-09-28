@@ -1,0 +1,34 @@
+﻿@model List<Gestion.EF.Models.Archivos_Adjuntos_Relacion>
+
+    <div class="row">
+        <div class="col-md-4"><h6 class="card-title">Archivos Adjuntos</h6></div>
+        <div class="col-md-6"></div>
+        <div class="col-md-2" ></div>
+    </div>
+
+    <br />
+    <div id="Lista" class="row"></div>
+    
+
+    <script>
+        var data = JSON.parse('@Html.Raw(Json.Serialize(Model))');
+        console.log(data);
+
+        var htmlD = "";
+        if (data.length > 0) {
+            for (var i = 0; i < data.length; i++) {
+
+                if (data[i].archivos_Adjuntos.extencion == "PNG" || data[i].archivos_Adjuntos.extencion == "JPG" || data[i].archivos_Adjuntos.extencion == "JPEG") {
+                    htmlD = htmlD + "<div class='col-md-3'><a href='" + data[i].archivos_Adjuntos.url + data[i].archivos_Adjuntos.archivo + "' target='_blank'><img src='" + data[i].archivos_Adjuntos.url + data[i].archivos_Adjuntos.archivo + "' style='width:100%; height:auto;'/> </a>" + data[i].archivos_Adjuntos.extencion + "<br>" + data[i].archivos_Adjuntos.sUsuario + "</div>";
+                } else {
+                    htmlD = htmlD + "<div class='col-md-3'><a href='" + data[i].archivos_Adjuntos.url + data[i].archivos_Adjuntos.archivo + "' target='_blank'>" + data[i].archivos_Adjuntos.archivo + "<br>" + data[i].archivos_Adjuntos.extencion + "<br>" + data[i].archivos_Adjuntos.sUsuario + " </a></div>";
+                }
+
+            }
+        } else {
+            htmlD = htmlD + "<div class='col-md-12'>No hay archivos cargados</div>";
+        }
+
+        $("#Lista").html(htmlD);
+
+    </script>

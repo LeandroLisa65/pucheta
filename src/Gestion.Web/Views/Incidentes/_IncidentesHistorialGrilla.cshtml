@@ -1,0 +1,296 @@
+﻿@model IEnumerable<Gestion.EF.Models.Incidentes_Historial>
+
+
+<span><h8><em><strong>Descripcion de Colores:</strong></em><strong> Verde:</strong>Cerrada - <strong>Amarilla:</strong>Proxima a vencer - <strong>Roja:</strong>Vencida - <strong>Azul:</strong>Soy creador - <strong>Gris:</strong>Cancelada/Suspendida</h8></span>
+<div id="GrillaKendo"></div>
+
+
+
+<script>
+
+    //// LIMPIEZA DE JSON
+    JSON.stringify = JSON.stringify || function (obj) {
+        var t = typeof (obj);
+        if (t != "object" || obj === null) {
+            // simple data type
+            if (t == "string") obj = '"' + obj + '"';
+            return String(obj);
+        }
+        else {
+            // recurse array or object
+            var n, v, json = [], arr = (obj && obj.constructor == Array);
+            for (n in obj) {
+                v = obj[n]; t = typeof (v);
+                if (t == "string") v = '"' + v + '"';
+                else if (t == "object" && v !== null) v = JSON.stringify(v);
+                json.push((arr ? "" : '"' + n + '":') + String(v));
+            }
+            var rawString = (arr ? "[" : "{") + String(json) + (arr ? "]" : "}");
+            return rawString;
+        }
+    };
+    function escape(key, val) {
+        if (typeof (val) != "string") return val;
+
+        var replaced = val
+        return replaced;
+    }
+    JSON.stringifyEscaped = function (obj) {
+        return JSON.stringify(obj, escape);
+    }
+    //// FIN LIMPIEzA JSON
+
+    // **********************************************************************************************************************************************************
+    // * 1 - CARGO LOS COMBOSS DEL FILTRO
+    // **********************************************************************************************************************************************************
+    //var data = JSON.parse('@Html.Raw(Json.Serialize(Model))');
+    var data = JSON.parse(JSON.stringifyEscaped(@Html.Raw(Json.Serialize(Model))));
+
+
+
+    $("#ddlEstados").change(function () {
+        Filtro(0);
+    });
+    $("#ddlVisualizacion").change(function () {
+        Filtro(0);
+    });
+    $("#ddlSituacion").change(function () {
+        Filtro(0);
+    });
+
+    $("#ddlFiltroProyecto").change(function () {
+        Filtro(0);
+    });
+
+    $("#ddlFiltroArea").change(function () {
+        Filtro(0);
+    });
+   function Filtro(id) {
+
+        var selectedValueEstado = $('#ddlEstados').val();
+        var selectedValueVisualizacion = $('#ddlVisualizacion').val();
+        var selectedValueSituacion = $('#ddlSituacion').val();
+        var selectedValueProyecto = $('#ddlFiltroProyecto').val();
+        var selectedValueArea = $('#ddlFiltroArea').val();
+       var selectedValueIdIncidente = 0;
+
+       var mEstado2 = JSON.parse(localStorage.getItem('ValoresFiltro'));
+       if (mEstado2 != null) {
+           selectedValueIdIncidente = mEstado2.IdIncidente;
+       }
+       if (id == 2) {
+           selectedValueIdIncidente = 0;
+       }
+        if (id == 1) {
+            //VErifico si tengo algun valor cargado en el LocalStorage
+            var mEstado = JSON.parse(localStorage.getItem('ValoresFiltro'));
+            if (mEstado != null) {
+                selectedValueEstado = mEstado.Estado;
+                selectedValueVisualizacion = mEstado.Visualizacion;
+                selectedValueSituacion = mEstado.Situacion;
+                selectedValueProyecto = mEstado.Proyecto;
+                selectedValueArea = mEstado.Area;
+                selectedValueIdIncidente = mEstado.IdIncidente;
+            }
+            else {
+                selectedValueEstado = 6;
+            }
+            $('#ddlEstados').val(selectedValueEstado);
+            $('#ddlVisualizacion').val(selectedValueVisualizacion);
+            $('#ddlSituacion').val(selectedValueSituacion);
+            $('#ddlFiltroProyecto').val(selectedValueProyecto);
+            $('#ddlFiltroArea').val(selectedValueArea);
+        }
+       //var estadoFiltro = { Estado: selectedValueEstado, Visualizacion: selectedValueVisualizacion, Situacion: selectedValueSituacion, Proyecto: selectedValueProyecto, Area: selectedValueArea, IdIncidente:0};
+       var estadoFiltro = { Estado: selectedValueEstado, Visualizacion: selectedValueVisualizacion, Situacion: selectedValueSituacion, Proyecto: selectedValueProyecto, Area: selectedValueArea, IdIncidente: selectedValueIdIncidente };
+       localStorage.setItem('ValoresFiltro', JSON.stringify(estadoFiltro));
+       var newData = data;
+        if (selectedValueEstado != "0") {
+            if (selectedValueEstado == "0") {
+                newData = newData;
+            }
+            if (selectedValueEstado == "1") {
+                newData = newData.filter(p => p.sEstado == "Abierto");
+            }
+            if (selectedValueEstado == "2") {
+                newData = newData.filter(p => p.sEstado == "Tratamiento");
+            }
+            if (selectedValueEstado == "3") {
+                newData = newData.filter(p => p.sEstado == "Validación");
+            }
+            if (selectedValueEstado == "4") {
+                newData = newData.filter(p => p.sEstado == "Cerrado");
+            }
+            if (selectedValueEstado == "5") {
+                newData = newData.filter(p => p.sEstado == "Cancelado");
+            }
+            if (selectedValueEstado == "6") {
+                newData = newData.filter(p => p.sEstado != "Cancelado" && p.sEstado != "Cerrado");
+            }
+        }
+        if (selectedValueVisualizacion != "TO") {
+            if (selectedValueVisualizacion == "0") {
+                newData = newData;
+            }
+            if (selectedValueVisualizacion == "CA") {
+                newData = newData.filter(p => p.visualiza_CA == "S");
+            }
+            if (selectedValueVisualizacion == "PA") {
+                newData = newData.filter(p => p.visualiza_PA == "S");
+            }
+            if (selectedValueVisualizacion == "CR") {
+                newData = newData.filter(p => p.visualiza_CR == "S");
+            }
+            if (selectedValueVisualizacion == "AS") {
+                newData = newData.filter(p => p.visualiza_AS == "S");
+            }
+        }
+        if (selectedValueVisualizacion != "0") {
+            if (selectedValueSituacion == "PC") {
+                newData = newData.filter(p => p.sColorFondo == "A");
+            }
+            if (selectedValueSituacion == "VE") {
+                newData = newData.filter(p => p.sColorFondo == "R");
+            }
+        }
+       if (selectedValueProyecto != "0") {
+            newData = newData.filter(p => p.sProyecto == selectedValueProyecto);
+       }
+       if (selectedValueArea != "0") {
+           newData = newData.filter(p => p.sAreaActual == selectedValueArea);
+       }
+       if (selectedValueIdIncidente != "0") {
+           newData = newData.filter(p => p.id == selectedValueIdIncidente);
+       }
+        grilla(newData);
+    }
+    // **********************************************************************************************************************************************************
+    // * 2 - CARGO LA GRILLA
+    // **********************************************************************************************************************************************************
+    function grilla(datos) {
+
+        $("#GrillaKendo").html("<div id='grillaIncidentes_Historial'></div>");
+        var colGrilla = [];
+        colGrilla.push({ field: "id", title: "Id", width: "55px", show: false });
+        colGrilla.push({ field: "creacion_Fecha", title: "F. Creacion", template: "#= kendo.toString(kendo.parseDate(creacion_Fecha), 'dd/MM/yyyy') #", width: "90px" });
+        colGrilla.push({ field: "sIncidente", title: "T. Incidente", media: "(min-width: 120px)" });
+        colGrilla.push({ field: "sProyecto", title: "Proyecto", media: "(min-width: 120px)" });
+        colGrilla.push({ field: "sContratista", title: "Contratista", media: "(min-width: 120px)" });
+        colGrilla.push({ field: "sEstado", title: "Estado", media: "(min-width: 97px)" });
+        colGrilla.push({ field: "sAreaActual", title: "Asignado A", media: "(min-width: 100px)" });
+        colGrilla.push({ field: "sUsuarioDueño", title: "Creador", media: "(min-width: 100px)" });
+        colGrilla.push({ title: "Solicitud", width: "70px", template: '# if (creacion_Descripcion) {#<button type="button" class="btn btn-secondary" data-toggle="tooltip" data-placement="top" title="(#=creacion_Descripcion#)"><i class="fa fa-info-circle" aria-hidden="true"></i></button>#} else {##}#', });
+        colGrilla.push({ title: "Comentario", width: "70px", template: '# if (sUltimoComentarioAgregado) {#<button type="button" class="btn btn-primary" data-toggle="tooltip" data-placement="top" title="#=sUltimoComentarioAgregado#"><i class="fa fa-info-circle" aria-hidden="true"></i></button>#} else {##}#', });
+        colGrilla.push({ command: { name: "kedit", text: "", click: Editar }, title: "Editar", width: "65px", attributes: { style: "text-align:center;" } });
+        colGrilla.push({ command: { name: "Archivos", text: "Archivos", click: verArchivosIH }, title: "Archivos", width: "65px", attributes: { style: "text-align:center;" } });
+
+          $("#grillaIncidentes_Historial").kendoGrid({
+        filterable: true,
+        sortable: true,
+        groupable: true,
+        reorderable: true,
+        columnMenu: true,
+        toolbar: ["excel"],
+        excel: {
+            fileName: "IncidentesHistorial.xlsx",
+
+            allPages: true,
+            filterable: true
+        },
+        dataSource: {
+            data: datos
+        },
+        columns: colGrilla,
+        dataBound: function () {
+            dataView = this.dataSource.view();
+            for (var i = 0; i < dataView.length; i++) {
+                if (dataView[i].sColorFondo == "R") {
+                    var uid = dataView[i].uid;
+                    $("#grillaIncidentes_Historial tbody").find("tr[data-uid=" + uid + "]").addClass("K-bacgraundRow_R");
+                }
+                if (dataView[i].sColorFondo == "A") {
+                    var uid = dataView[i].uid;
+                    $("#grillaIncidentes_Historial tbody").find("tr[data-uid=" + uid + "]").addClass("K-bacgraundRow_A");
+                }
+                if (dataView[i].sColorFondo == "V") {
+                    var uid = dataView[i].uid;
+                    $("#grillaIncidentes_Historial tbody").find("tr[data-uid=" + uid + "]").addClass("K-bacgraundRow_V");
+                }
+                if (dataView[i].sColorFondo == "Z") {
+                    var uid = dataView[i].uid;
+                    $("#grillaIncidentes_Historial tbody").find("tr[data-uid=" + uid + "]").addClass("K-bacgraundRow_Z");
+                }
+                if (dataView[i].sColorFondo == "N") {
+                    var uid = dataView[i].uid;
+                    $("#grillaIncidentes_Historial tbody").find("tr[data-uid=" + uid + "]").addClass("K-bacgraundRow_N");
+                }
+                if (dataView[i].sColorFondo == "G") {
+                    var uid = dataView[i].uid;
+                    $("#grillaIncidentes_Historial tbody").find("tr[data-uid=" + uid + "]").addClass("K-bacgraundRow_G");
+                }
+            }
+        }
+
+    });
+    }
+
+    function cargaGrilla() {
+        $("#AlertaProceso").show(600);
+        var ddlTiempos = $('#ddlTiempos').val();
+        var ddlEstados = $("#ddlEstados").val();
+        var ddlVisualizacion = $("#ddlVisualizacion").val();
+
+        var modelFiltro = {
+            mfd: ddlTiempos,
+            mfh: ddlEstados,
+            strFiltroTexto1: ddlVisualizacion
+        };
+
+        $.post("/Incidentes/IncidentesHistorialGrilla", modelFiltro).done(function (data) {
+            if (data.data.length > 0) {
+                grilla(data.data);
+            }
+            else {
+                grilla(null);
+            }
+        });
+    }
+
+ 
+    function verArchivosIH(e) {
+        var registro = this.dataItem($(e.currentTarget).closest("tr"));
+        //Controlamos que tenga un archivo cargado
+        var modelArchivo = { IdIncidenteHistorial: registro.id};
+
+        $.post("/Incidentes/MostrarArchivoIncidenteHistorial", modelArchivo).done(function (e) {
+            if (!e.isError) {
+                if(e.data2 !=""){
+                    window.open(e.data2);
+                }else{
+                    toastr.error(e.data, { timeOut: 2000 });
+                }        
+            }
+            
+        });
+       
+    }
+
+    function eliminarArchivo(IdArchivoAdjunto) {
+        $.post("/ArchivoAdjunto/EliminarArchivo", { id: IdArchivoAdjunto })
+            .done(function (res) {
+                if (res.isError) {
+                    toastr.error(res.message, { timeOut: 2000 });
+                }
+                else {
+                    toastr.success(res.message, { timeOut: 2000 });
+                    $.get("@Url.Action("_IncidentesHistorialArchivos", "Incidentes")/" + idIncidente,
+                    function (data) { $('.modal-body2').html(data); });
+                }
+            });
+    }
+
+    grilla(data);
+    Filtro(1);
+
+
+</script>

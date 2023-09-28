@@ -1,0 +1,90 @@
+﻿@model Gestion.EF.ItemObraAdic
+
+<div class="row">
+    <div class="col-md-12">
+        <input type="hidden" asp-for="oa.Id" />
+        <div class="form-group">
+            <label asp-for="oa.ParteDiarioId" class="control-label"></label>
+            @Html.DropDownListFor(model =>
+                model.oa.ParteDiarioId,
+                new SelectList(Model.ParteDiario, "Id", "Asig_Contratista")
+                , new { @class = "form-control" }
+            )
+
+        </div>
+
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="form-group">
+            <label asp-for="oa.Obra_Adicional" class="control-label"></label>
+            <input asp-for="oa.Obra_Adicional" type="text" class="form-control">
+            <span asp-validation-for="oa.Obra_Adicional" class="text-danger"></span>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="form-group">
+            <label asp-for="oa.Estado" class="control-label"></label>
+            <input asp-for="oa.Estado" type="text" class="form-control">
+            <span asp-validation-for="oa.Estado" class="text-danger"></span>
+        </div>
+    </div>
+
+</div>
+
+
+
+
+
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="form-group">
+            <button type="button" class="btn btn-primary" onclick="GrabarContratista()"> Grabar </button>
+            <button type="button" class="btn btn-secondary" data-dismiss="modal"> Cerrar </button>
+        </div>
+    </div>
+</div>
+
+<script>
+
+    function GrabarContratista() {
+
+        var valid = validaDatos('ObraAdicModal');
+        if (!valid.isError) {
+
+
+
+            var model = {
+                Id: $('#oa_Id').val(),
+                ParteDiarioId: $('#oa_ParteDiarioId').val(),
+                Obra_Adicional: $('#oa_Obra_Adicional').val(),
+                Estado: $('#oa_Estado').val(),
+            };
+
+
+            $.post("/ParteDiario/ObraAdicGraba", model).done(function (e) {
+
+                if (!e.isError) {
+                    toastr.success(e.data, { timeOut: 2000 });
+                    $('#ObraAdicModal').modal('hide');
+
+                } else {
+                    toastr.error(e.data, { timeOut: 2000 });
+                }
+
+            });
+
+
+        } else {
+            toastr.error(valid.mensaje, { timeOut: 2000 });
+        }
+    }
+
+
+</script>

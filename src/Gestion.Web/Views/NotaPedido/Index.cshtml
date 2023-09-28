@@ -1,0 +1,80 @@
+﻿@{
+    ViewData["Title"] = "Notas de Pedido";
+    Layout = "~/Views/Shared/_LayoutGestion.cshtml";
+}
+<div class="row">
+    <div class="col-lg-12">
+        <div class="card  card-rojo">
+            <div class="card-header cabecera">
+                <button style="float:right;" class="btn btn-primary" id="btn_Nuevo"
+                        onclick="Nuevo()">
+                    <i class="far fa-edit"></i>
+                    Agregar Nota Pedido
+                </button>
+                <h5 class="m-0">Gestión de Notas de Pedidos</h5>
+            </div>
+            <div id="conten_NotaPedidoGrilla" class="card-body">
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade  bd-example-modal-xl"
+     id="NotaPedidoModal"
+     @*tabindex="-1"*@
+     role="dialog"
+     aria-labelledby="myLargeModalLabel"
+     aria-hidden="true"
+     data-backdrop="static">
+    <div class="modal-dialog  modal-xl" role="document">
+        <div class="modal-content">
+            <div class="modal-header cabecera">
+                <h5 id="ModalTitulo" class="modal-title"></h5>
+                <button type="button" style="color:#ffffff" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@section scripts  {
+
+    <script>
+        cargaGrilla();
+
+        function cargaGrilla() {
+            var urlAction = '@Url.Action("_NotaPedidoGrilla","NotaPedido")';
+            $("#conten_NotaPedidoGrilla").load(urlAction);
+        }
+
+        function Editar(e) {
+
+            var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+            var id = dataItem.id;
+            $('#ModalTitulo').html(" Editar Nota de Pedidos");
+                $.get("@Url.Action("_NotaPedidoAbm", "NotaPedido")/" + id,
+                    function (data) { $('.modal-body').html(data); })
+            $('#NotaPedidoModal').modal('show');
+            }
+
+        function Nuevo() {
+            $('#ModalTitulo').html("Agregar Nota de Pedido");
+            $.get("@Url.Action("_NotaPedidoAbm", "NotaPedido")/0",
+                function (data) { $('.modal-body').html(data); })
+            $('#NotaPedidoModal').modal('show');
+        }
+
+        $('#NotaPedidoModal').on('hidden.bs.modal', function (e) {
+            $('.modal-body').html("");
+            cargaGrilla();
+        })
+
+    </script>
+
+}

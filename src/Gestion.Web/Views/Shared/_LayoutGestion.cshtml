@@ -1,0 +1,262 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <title>@ViewBag.Title</title>
+    <link href="~/plugins/fontawesome-free/css/fontawesome.css" rel="stylesheet" />
+    <link rel="stylesheet" href="~/plugins/fontawesome-free/css/all.min.css">
+    <link rel="stylesheet" href="~/dist/css/adminlte.min.css">
+    <link rel="stylesheet" href="~/lib/bootstrap-floating-labels-master/floating-labels.css">
+    <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
+    <link href="@Url.Content("~/css/site.css")" rel="stylesheet" type="text/css" />
+    <link href="@Url.Content("~/css/animate.css")" rel="stylesheet" type="text/css" />
+    <link href="@Url.Content("~/plugins/kendoui_2022_2_802/styles/kendo.common.min.css")" rel="stylesheet" />
+    <link href="@Url.Content("~/plugins/kendoui_2022_2_802/styles/kendo.bootstrap.min.css")" rel="stylesheet" />
+    <link href="~/css/Pucheta.css?1" rel="stylesheet" />
+    <link href="@Url.Content("~/plugins/toastr/toastr.min.css")" rel="stylesheet" />
+    <link href="@Url.Content("~/plugins/icheck-bootstrap/icheck-bootstrap.css")" rel="stylesheet" />
+</head>
+<body id="contenBody" class="hold-transition sidebar-mini">
+    <div id="load" class="loading"></div>
+    <div class="wrapper">
+        <nav id="vapp_layout" class="main-header navbar navbar-expand navbar-white navbar-light">
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" data-widget="pushmenu" href="#"><i class="fas fa-bars"></i></a>
+                </li>
+            </ul>
+            <ul class="navbar-nav ml-auto">
+                <li class='nav-item' style="margin-top:-10px">
+                    <a href='/ParteDiario2' class='nav-link'>
+                        <img style="width:40px;height:auto;" src="~/dist/img/IconoPD.png" />
+                        <span style="font-size:15px;">Parte Diario</span>
+                    </a>
+                </li>
+            </ul>
+            <ul class="navbar-nav ml-auto">
+                <li class='nav-item' style="margin-top:-10px">
+                    <a href='/Proyecto/Proyecto/' class='nav-link'>
+                        <img style="width:40px;height:auto;" src="~/dist/img/IconoProye.png" />
+                        <span style="font-size:15px;">Proyectos</span>
+                    </a>
+                </li>
+            </ul>
+            <ul class="navbar-nav ml-auto">
+                <li class='nav-item' style="margin-top:-10px">
+                    <a href='/Certificados/' class='nav-link' style="display:inline-block">
+                        <img style="width:40px;height:auto;" src="~/dist/img/IconoPD.png" />
+                        <span style="font-size:15px;">Certificados</span>
+                    </a>
+                   @* <span class="badge badge-danger"
+                          v-if="cantidadNotificacionesLeidas > 0"
+                          @@click="mostrarNotificacionesCertificados()"
+                          style="cursor: pointer">
+                        {{cantidadNotificacionesLeidas}}
+                    </span>
+                    <span v-if="cantidadNotificacionesLeidas == 0 && cantidadNotificaciones > 0"
+                          @@click="mostrarNotificacionesCertificados()"
+                          style="cursor: pointer">
+                        <i class="fas fa-angle-down"></i>
+                    </span>
+                    <div id="divNotificacionesCertificados"
+                         @@mouseleave="ocultarNotificacionesCertificados()"
+                         class="dropdown-menu dropdown-menu-lg"
+                         style="left: inherit; position: absolute;">
+                        <div style="height:20em; overflow-y:auto">
+                            <a v-bind:href="getUrl(oNotificacion)" class="dropdown-item"
+                               v-for="oNotificacion in lNotificaciones">
+                                <div class="media" @@mouseover="leerNotificacion(oNotificacion)">
+                                    <div class="media-body">
+                                        <h3 class="dropdown-item-title">
+                                            {{oNotificacion.titulo}}
+                                            <span class="float-right text-sm text-success" v-if="oNotificacion.leida">
+                                                <i class="fas fa-bell"></i>
+                                            </span>
+                                            <span class="float-right text-sm text-warning" v-else>
+                                                <i class="fas fa-bell"></i>
+                                            </span>
+                                        </h3>
+                                        <p class="text-sm" style="white-space: pre-wrap;">{{oNotificacion.mensaje}}</p>
+                                        <p class="text-sm text-muted"><i class="far fa-clock mr-1"></i>{{oNotificacion.fechaEmision}}</p>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                        <div class="dropdown-divider"></div>
+                    </div>*@
+                </li>
+            </ul>
+            <ul class="navbar-nav ml-auto">
+                <li class='nav-item' style="margin-top:5px;">
+                    <a href='/incidentes/incidentesHistorial' class='nav-link'>
+                        <img style="width:25px;height:auto;" src="~/dist/img/bell.jpg" />
+                        <span style="font-size:15px;">Incidentes</span>
+                    </a>
+                </li>
+            </ul>
+            <ul class="navbar-nav ml-auto">
+                <li class='nav-item'>
+                    <a href='/Gestion/Logout' class='nav-link'>
+                        <i class="fas fa-sign-out-alt"></i> Salir
+                    </a>
+                </li>
+            </ul>
+        </nav>
+        <aside class="main-sidebar sidebar-light-navy elevation-4 ">
+            <a href="/Gestion" class="brand-link navbar-light">
+                <img src="~/dist/img/icono.png" alt="" class="brand-image img-circle elevation-3"
+                     style="opacity: .8">
+                <span class="brand-text font-weight-light">
+
+                    <img src="~/dist/img/logoColor.png" style="width:200px; height:auto;" />
+
+                </span>
+            </a>
+
+            @await Component.InvokeAsync("Menu")
+
+        </aside>
+        <div class="content-wrapper">
+            <div class="content">
+                <div class="container-fluid">
+                    <br />
+                    @RenderBody()
+                </div>
+            </div>
+        </div>
+        <footer class="main-footer">
+            <div id="divFecha" class="float-right d-none d-sm-inline">
+                @*Versión 0.1.21 - 07/06/2021*@
+            </div>
+            <strong>Desarrollado por <a href="www.iotecnologias.com.ar">IOTecnologias</a></strong>.
+        </footer>
+    </div>
+    @Html.AntiForgeryToken()
+
+    <script src="~/plugins/kendoui_2022_2_802/js/jquery.min.js"></script>
+    <script src="~/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/Uploadpicture.js" asp-append-version="true"></script>
+    <script src="~/js/Avatar.js" asp-append-version="true"></script>
+
+    <script src="~/dist/js/adminlte.min.js" asp-append-version="true"></script>
+    <script src="~/plugins/kendoui_2022_2_802/js/kendo.all.min.js"></script>
+    <script src="~/plugins/kendoui_2022_2_802/js/messages/kendo.messages.es-AR.min.js"></script>
+    <script src="~/plugins/kendoui_2022_2_802/js/jszip.min.js"></script>
+    <script src="~/plugins/kendoui_2022_2_802/js/pako_deflate.min.js"></script>
+    <script>
+        // Import DejaVu Sans font for embedding
+
+        // NOTE: Only required if the Kendo UI stylesheets are loaded
+        // from a different origin, e.g. cdn.kendostatic.com
+        kendo.pdf.defineFont({
+            "DejaVu Sans": "https://kendo.cdn.telerik.com/2016.2.607/styles/fonts/DejaVu/DejaVuSans.ttf",
+            "DejaVu Sans|Bold": "https://kendo.cdn.telerik.com/2016.2.607/styles/fonts/DejaVu/DejaVuSans-Bold.ttf",
+            "DejaVu Sans|Bold|Italic": "https://kendo.cdn.telerik.com/2016.2.607/styles/fonts/DejaVu/DejaVuSans-Oblique.ttf",
+            "DejaVu Sans|Italic": "https://kendo.cdn.telerik.com/2016.2.607/styles/fonts/DejaVu/DejaVuSans-Oblique.ttf",
+            "WebComponentsIcons": "https://kendo.cdn.telerik.com/2017.1.223/styles/fonts/glyphs/WebComponentsIcons.ttf"
+        });
+    </script>
+    <script src="~/js/utiles.js" asp-append-version="true"></script>
+    <script src="~/plugins/toastr/toastr.min.js" asp-append-version="true"></script>
+    <script src="~/js/gestion.js" asp-append-version="true"></script>
+    <script src="~/js/tools.js" asp-append-version="true"></script>
+    <script src="~/lib/bootstrap-floating-labels-master/floating-labels.js"></script>
+    <script src="~/lib/printJS/print.min.js"></script>
+    <script src="~/lib/vuejs/vue.js"></script>
+    <script src="~/lib/axios/axios.min.js"></script>
+
+    @RenderSection("Scripts", required: false)
+<script>
+        const app_layout = Vue.createApp({
+            data() {
+                return {
+                    lNotificaciones: [],
+                }
+            },
+            computed: {
+
+                cantidadNotificaciones() {
+                    return this.lNotificaciones.length;
+                },
+                cantidadNotificacionesLeidas() {
+                    return this.lNotificaciones.filter(n => n.leida == false).length;
+                }
+            },
+            methods: {
+                buscarNotificaciones() {
+                    axios.get("/Notificacion/GetNotificaciones/")
+                        .then(res => {
+                            const data = res.data;
+                            if (data.isError)
+                                toastr.error(data.mensaje, { timeOut: 2000 });
+                            else {
+                                this.lNotificaciones = data.lNotificaciones;
+                            }
+                        })
+                        .catch(error => {
+                            toastr.error("Error!", { timeOut: 2000 });
+                            console.log(error.response);
+                        });
+                },
+                mostrarNotificacionesCertificados() {
+                    divNotificacionesCertificados.classList.add("show");
+                },
+                ocultarNotificacionesCertificados() {
+                    divNotificacionesCertificados.classList.remove("show");
+                },
+                leerNotificacion(oNotificacion) {
+                    if (!oNotificacion.leida) {
+                        axios
+                            .post("/Notificacion/LeerNotificacion/", { id: oNotificacion.id })
+                            .then(res => {
+                                const data = res.data;
+                                if (data.isError)
+                                    toastr.error(data.mensaje, { timeOut: 2000 });
+                                else {
+                                    let lNotificaciones_Aux = [];
+                                    this.lNotificaciones.forEach(n => {
+                                        if (n.id == oNotificacion.id)
+                                            lNotificaciones_Aux.push(data.oNotificacion);
+                                        else lNotificaciones_Aux.push(n);
+                                    });
+                                    this.lNotificaciones = lNotificaciones_Aux;
+                                }
+                            })
+                            .catch(error => {
+                                toastr.error("Error!", { timeOut: 2000 });
+                                console.log(error.response);
+                            });
+                    }
+                },
+                getUrl(oNotificacion) {
+                    return "/GestionCertificados/?ProyCertificadoId=" + oNotificacion.entidadId;
+                }
+            }
+        });
+        const vm_layout = app_layout.mount("#vapp_layout")
+        vm_layout.buscarNotificaciones();
+
+        function cargarFiltrosFechas() {
+            var FiltroFecha = document.getElementById('dtpFecha');
+            var fecActual = new Date();
+            var mes = fecActual.getMonth() + 1;
+            //var fechaHasta = fecActual.getFullYear() + "-" + (mes < 10 ? ("0" + mes) : mes) + "-" + fecActual.getDate();
+            var fechaHasta = fecActual.getDate() + "/" + (mes < 10 ? ("0" + mes) : mes) + "/" + fecActual.getFullYear();
+            //FiltroFecha.html = fechaHasta;
+
+            let table = "<span>Versión 0.1.21 - ";
+            table += fechaHasta;
+            table += "</span>";
+            divFecha.innerHTML = table;
+        }
+
+        cargarFiltrosFechas();
+
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,33 @@
+﻿@model IEnumerable<Gestion.EF.Models.PartidaPresupuestaria>
+<br />
+<div id="GrillaKendo"></div>
+<script>
+
+    function grilla(datos) {
+         
+        $("#GrillaKendo").html("<div id='grillaPartidasPresupuestarias'></div>");
+
+        $("#grillaPartidasPresupuestarias").kendoGrid({
+            filterable: true,
+            sortable: true,
+            dataSource: {
+                data: datos
+            },
+            columns: [
+                { field: "id", title: "Id", width: "80px" },
+                { field: "codigo", title: "Código" },
+                { field: "descripcion", title: "Descripción" },
+                { command: { name: "kedit", text:"", click: Editar }, title: "Editar", width: "65px" , attributes: { style: "text-align:center;" } }
+            ]
+
+        });
+    }
+
+    var data = JSON.parse('@Html.Raw(Json.Serialize(Model))');
+    
+    grilla(data);
+
+
+</script>
+
+

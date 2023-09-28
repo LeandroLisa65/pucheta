@@ -1,0 +1,205 @@
+﻿@{
+    ViewData["Title"] = "ParteDiario";
+    Layout = "~/Views/Shared/_LayoutGestion.cshtml";
+}
+
+
+@* ENCABEZADO *@
+<div class="row">
+    <div class="col-lg-12">
+        <div class="card  card-rojo">
+            <div class="card-header cabecera">
+                <h5 class="m-0">Gestión de Parte Diario</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label class="control-label">Proyectos</label>
+                            <input id="ddlProyectosDisponibles" />
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label class="control-label">Fecha</label>
+                            <input type="date" id="dtpFechaPD" class="form-control" />
+                        </div>
+                    </div>
+                    <div style="margin-top:25px;" class="col-md-7">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <button type="button" class="btn btn-primary"
+                                        style="margin-left:1em"
+                                        onclick="btnNuevoPD()">
+                                    <i class="fa fa-plus-circle"></i>
+                                    Crear Parte Diario
+                                </button>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="btn-volver" type="button" onclick="Volver()"><i class="fas fa-arrow-left"></i> Volver</div>
+                            </div>
+                            <div class="col-md-7">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@* FIN ENCABEZADO *@
+@* TAB DE PESTAÑAS *@
+<div id="pnlDetallePD" class="row">
+    <div class="col-lg-12">
+        <div class="card  card-rojo">
+            <div class="card-header cabecera">
+                <h5 class="m-0" id="lblTituloPD"></h5>
+                <input id="mIdProyecto" type="hidden" />
+            </div>
+            <div class="card-body">
+                    <nav>
+                        <div class="nav nav-tabs" id="nav-tabAct" role="tablist">
+                            <a class="nav-item nav-link active" id="nav-gri1-tab" data-toggle="tab" href="#nav-gri1" role="tab" aria-controls="nav-gri1" aria-selected="true">Asistencia del Personal</a>
+                            <a class="nav-item nav-link " id="nav-gri2-tab" data-toggle="tab" href="#nav-gri2" role="tab" aria-controls="nav-gri2" aria-selected="false">Actividades</a>
+                            <a class="nav-item nav-link " id="nav-gri3-tab" data-toggle="tab" href="#nav-gri3" role="tab" aria-controls="nav-gri3" aria-selected="false">Novedades</a>
+                            <a class="nav-item nav-link " id="nav-gri4-tab" data-toggle="tab" href="#nav-gri4" role="tab" aria-controls="nav-gri4" aria-selected="false">Incidentes</a>
+                        </div>
+                    </nav>
+                    <div class="tab-content" id="nav-tabContent">
+                        <div class="tab-pane fade  show active" id="nav-gri1">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div id="Conte_grillaAsitencias"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="nav-gri2">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div id="conten_grillaActividades"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="nav-gri3">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div id="conten_grillaNovedades"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="nav-gri4">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div id="conten_grillaIncidentes"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section scripts  {
+    <script>
+        if ($('#mIdProyecto').val() > 0) {
+            $('#pnlDetallePD').show();
+        } else {
+            $('#pnlDetallePD').hide();
+        }
+        cargarFiltrosFechas();
+        cargaFiltroProyecto();
+
+        function cargarFiltrosFechas() {
+            var FiltroFecha = document.getElementById('dtpFechaPD');
+            var fecActual = new Date();
+            var mes = fecActual.getMonth()+1;
+            var fechaHasta = fecActual.getFullYear() + "-" + (mes < 10 ? ("0" + mes) : mes) + "-" + fecActual.getDate();
+            FiltroFecha.value = fechaHasta;
+        }
+
+        function cargaFiltroProyecto() {
+            $.post("/Proyecto/GetProyectosActivos")
+                .done(function (e) {
+                    if (!e.isError) {
+                        data2 = e.data;
+
+                        $("#ddlProyectosDisponibles").kendoDropDownList({
+                            filter: "startswith",
+                            dataTextField: "nombre",
+                            dataValueField: "id",
+                            optionLabel: "Todos los Proyectos",
+                            value: 0,
+                            dataSource: data2,
+                            height: 400
+                        });
+
+                    } else {
+                        toastr.error(e.data, { timeOut: 2000 });
+                    }
+                });
+        }
+
+        function btnNuevoPD() {
+            /*CREO EL PARTE DIARIO*/
+            var model = {
+                fechaDesde: $('#dtpFechaPD').val(),
+                proyecto: $("#ddlProyectosDisponibles").val()
+            }
+
+            $.post("/ParteDiario2/InicializacionPD", model).done(function (e) {
+                if (!e.isError) {
+                    /*CARGO LA ASISTENCIA*/
+                    $('#pnlDetallePD').show();
+                    cargoAsistencia(e.data);
+                    cargoActividades(e.data);
+                    cargoNovedades(e.data);
+                    cargoIncidentes(e.data);
+                }
+                else {
+                    toastr.error(e.data, { timeOut: 2000 });
+                }
+            });
+
+
+        }
+
+        function Volver() {
+            window.location.replace("/ParteDiario2");
+        }
+        
+        function cargoAsistencia(IdPD) {
+
+            $.get("@Url.Action("_ParteDiarioAsistencia","ParteDiario2")/" + IdPD,
+                    function (data) {
+                        $('#Conte_grillaAsitencias').html(data);
+                    })
+        }
+
+        function cargoActividades(IdPD) {
+        $.get("@Url.Action("_ParteDiarioActividades","ParteDiario2")/" + IdPD,
+                    function (data) {
+                        $('#conten_grillaActividades').html(data);
+                    })
+        }
+ 
+        function cargoNovedades(IdPD) {
+
+            $.get("@Url.Action("_ParteDiarioNovedades","ParteDiario2")?id=" + $('#ddlProyectosDisponibles').val()+"&id2="+IdPD,
+                    function (data) {
+                        $('#conten_grillaNovedades').html(data);
+                    })
+        }
+
+
+        function cargoIncidentes(IdPD) {
+
+            $.get("@Url.Action("_ParteDiarioIncidentes","ParteDiario2")?id=" + $('#ddlProyectosDisponibles').val() + "&id2=" + IdPD,
+                function (data) {
+                    $('#conten_grillaIncidentes').html(data);
+                })
+        }
+
+       
+
+    </script>
+}
